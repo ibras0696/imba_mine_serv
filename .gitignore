@@ -1,0 +1,31 @@
+# Общие временные файлы
+.DS_Store
+Thumbs.db
+*.log
+
+# Локальные env-файлы (оставляем только шаблон)
+env/*.env
+!env/.env.example
+
+# Моды и ресурсы, которые нельзя коммитить
+mods/server/*.jar
+mods/server/*.zip
+mods/client/*.jar
+mods/client/*.zip
+
+# Данные сервера и логи (генерируются автоматически)
+data/
+logs/
+
+# Локально скачанные установщики/артефакты
+docker/artifacts/
+
+# Бэкапы/архивы
+backup/
+*.tar
+*.tar.gz
+*.zip
+
+# Docker артефакты, если появятся
+docker-data/
+compose/*.override.yml

@@ -1,0 +1,2 @@
+# Ручной список ссылок (например, для модов только с CurseForge).
+# Формат: https://example.com/mod.jar OptionalName.jar

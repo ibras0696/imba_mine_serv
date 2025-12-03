@@ -18,6 +18,7 @@ services:
       EULA: "${EULA}"
       TYPE: "FORGE"
       VERSION: "${MC_VERSION:-1.20.1}"
+      FORGE_INSTALLER: "${FORGE_INSTALLER}"
       INIT_MEMORY: "${MEMORY_MIN}"
       MAX_MEMORY: "${MEMORY_MAX}"
       SERVER_NAME: "${SERVER_NAME}"
@@ -39,3 +40,5 @@ services:
       - ../mods/server:/data/mods
       # Логи сервера (полезно для отладки)
       - ../logs:/data/logs
+      # Forge installer и прочие артефакты, чтобы не качать внутри контейнера
+      - ../docker/artifacts:/data/artifacts

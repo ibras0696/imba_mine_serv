@@ -29,3 +29,6 @@ backup/
 # Docker артефакты, если появятся
 docker-data/
 compose/*.override.yml
+
+# локальные утилиты (plink, вспомогательные бинарники)
+tools/

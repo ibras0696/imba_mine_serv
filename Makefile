@@ -15,7 +15,7 @@ ENV_FILE ?= env/local.env
 DOCKER_COMPOSE := docker compose
 PYTHON ?= py
 
-.PHONY: help up down restart logs ps clean rebuild fetch-mods
+.PHONY: help up down restart logs ps clean rebuild fetch-mods forge-installer
 
 help:
 	@echo "Доступные команды:"
@@ -26,6 +26,7 @@ help:
 	@echo "  make ps         - статус контейнера"
 	@echo "  make clean      - удалить контейнер и связанные тома (осторожно)"
 	@echo "  make rebuild    - пересобрать образ (после правок Dockerfile)"
+	@echo "  make forge-installer - download Forge installer into docker/artifacts"
 
 up:
 	@if [ ! -f "$(ENV_FILE)" ]; then \
@@ -65,3 +66,11 @@ fetch-mods:
 		else \
 			echo "INFO: CURSEFORGE_API_KEY не задан, пропускаю CurseForge."; \
 		fi
+
+forge-installer:
+	@if [ ! -f "$(ENV_FILE)" ]; then \
+		echo "WARNING: файл $(ENV_FILE) не найден. Скопируй env/.env.example -> $(ENV_FILE) и заполни."; \
+		exit 1; \
+	fi
+	@set -a; . $(ENV_FILE); set +a; \
+		bash git/scripts/download_forge.sh "$${MC_VERSION:-1.20.1}" "$${FORGE_VERSION:-47.4.10}"

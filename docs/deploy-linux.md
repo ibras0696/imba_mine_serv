@@ -24,11 +24,11 @@
 ## 2. Клонирование репозитория
 
 ```bash
-git clone https://example.com/forge-toolkit.git
-cd forge-toolkit
+git clone https://github.com/ibras0696/imba_mine_serv.git
+cd imba_mine_serv
 ```
 
-> Ссылка — любая, куда зальём этот проект. Если нет Git, ставим: `sudo apt install git -y`.
+> Если Git не установлен: `sudo apt install git -y`.
 
 ---
 
@@ -41,6 +41,12 @@ cd forge-toolkit
    - `SERVER_NAME=My Forge Server`
    - `MEMORY_MIN/MAX` под ресурсы VPS (обычно 2G/4G минимум).
 3. Для Makefile скажем использовать прод-файл: `export ENV_FILE=env/production.env` или укажем при вызове (`make up ENV_FILE=env/production.env`).
+4. Скачиваем оффлайн Forge installer и моды:
+   ```bash
+   make forge-installer ENV_FILE=env/production.env
+   make fetch-mods ENV_FILE=env/production.env
+   ```
+   Теперь контейнер не будет тянуть Forge/моды из интернета при первом старте.
 
 ---
 

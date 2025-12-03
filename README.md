@@ -1,153 +1,122 @@
-# Minecraft Forge 1.20.1 Server Toolkit (проектная заготовка)
+# Minecraft Forge 1.20.1 Server Toolkit
 
-Привет! Это черновой репозиторий, который мы собираемся превратить в удобный набор скриптов и инструкций для запуска **Forge 1.20.1** сервера. Сейчас тут только структура и план. Ниже — как ориентироваться.
+Проект для админа, которому нужно быстро поднять Forge‑сервер (1.20.1) на любой машине — от Windows‑ноута до VPS на Linux. Всё управление через `make`, конфигурация в `.env`, моды качаются автоматически (Modrinth/CurseForge), а игрокам даём готовый скрипт для установки клиентских модов.
 
-## Зачем это всё
+## Требования
 
-- поднять сервер одной командой (`make up`);
-- хранить все настройки в `.env`;
-- отделить моды для сервера и для клиента;
-- запускать всё внутри Docker/Compose, чтобы было одинаково и на Windows, и на Linux.
+- Docker + Docker Compose (на Windows — Docker Desktop).
+- Git + Make (в составе Git for Windows уже есть `bash` и `make`).
+- Python 3.10+ (нужен для скриптов Modrinth/CurseForge; на Windows используем `py`).
 
-## Структура (на 1‑й спринт)
+## Структура
 
-| Папка/файл     | Что лежит                                        |
-|----------------|--------------------------------------------------|
-| `compose/`     | будущий `docker-compose.yml` и сопутствующие     |
-| `docker/`      | Dockerfile, скрипты сборки образа                |
-| `mods/server/` | `.jar` серверных модов                           |
-| `mods/client/` | списки клиентских модов (md/json)                |
-| `env/`         | `.env.example`, `local.env`, `production.env`    |
-| `docs/`        | документация, например `modpack.md`              |
-| `git/`         | всё, что пригодится для Git (хуки, шаблоны)      |
-| `Makefile`     | будет CLI-слой для админа                        |
-| `PLAN.md`      | подробное ТЗ/роадмап (добавим на этом шаге)      |
+| Путь               | Назначение                                                                |
+|--------------------|---------------------------------------------------------------------------|
+| `compose/`         | `docker-compose.yml` и связанные файлы                                   |
+| `docker/`          | Dockerfile + артефакты Forge installer (`docker/artifacts`)               |
+| `mods/server/`     | `.jar` серверных модов (то, что монтируется в контейнер)                  |
+| `mods/client/`     | полезные клиентские моды/оптимизации                                      |
+| `mods/sources/`    | JSON/TXT‑списки для автоматической загрузки модов                         |
+| `git/scripts/`     | Все утилиты: загрузка модов, Forge installer, установка клиентских модов |
+| `env/`             | `.env.example` + твои локальные/прод конфиги                              |
+| `docs/`            | Подробная документация (`modpack.md`, `player-guide.md`, `deploy-linux.md`) |
+| `data/`, `logs/`   | Мир/конфиги/логи сервера (монтируются как volume)                         |
 
-Пока большинство файлов пустые — дальше мы их заполним.
-
-## Документация по модам
-
-- Список модов теперь хранится в `docs/modpack.md`. Там таблицы по категориям, зависимостям и подсказкам для игроков.
-- Если нужно объяснить игрокам, что ставить на клиент, просто дай ссылку на этот файл.
-- Для игроков-новичков есть отдельный гайд `docs/player-guide.md` – там описано, как установить Forge, скопировать моды и зайти на сервер.
-- Есть упрощённый скрипт для игрока: `bash git/scripts/install_client_mods.sh /путь/к/.minecraft/mods`. Он вызовет `make fetch-mods`, возьмёт все `.jar` из `mods/server` + `mods/client` и скопирует их в указанную папку. (На Windows просто открой Git Bash и выполни эту команду.)
-
-## Автоматическая загрузка модов
-
-### 1. Modrinth API (по списку из `docs/modpack.md`)
-
-- Моды перечислены в `mods/sources/modrinth-server.json` и `mods/sources/modrinth-client.json`.
-- Скрипт `git/scripts/fetch_modrinth.py` сам обращается к Modrinth API, берёт последнюю версию под Forge `1.20.1` и скачивает `.jar` в правильную папку.
-- Пример запуска (на Windows используем `py`, на Linux можно `python3`):
+## Быстрый старт (локально/на сервере)
 
 ```bash
-make fetch-mods            # автоматический режим (Modrinth + CurseForge)
-# или вручную:
-py git/scripts/fetch_modrinth.py server
-py git/scripts/fetch_modrinth.py client
+git clone https://github.com/ibras0696/imba_mine_serv.git
+cd imba_mine_serv
+
+cp env/.env.example env/local.env     # или env/production.env на VPS
+${EDITOR:-nano} env/local.env         # правим порт, EULA, OPS, память и т.д.
+
+make forge-installer                  # скачиваем оффлайн Forge installer в docker/artifacts
+make fetch-mods                       # тянем все моды из Modrinth (+ CurseForge если есть API-ключ)
+
+make up                               # поднимаем контейнер
+make logs                             # следим за логами
 ```
 
-- Все реальные URL фиксируются в `mods/sources/download_log.csv` (там видно версию, ссылку и куда файл положен).
-- Если мода нет на Modrinth (например, Immersive Engineering, FTB Ultimine) или версия отсутствует (Flywheel теперь вшит в Create), скрипт напишет `[error]`/`[warn]`. Такие моды нужно скачать вручную и положить в `mods/server`, либо добавить прямые ссылки в ручной список (см. ниже).
-- Версию Minecraft/загрузчик можно переопределить переменными `MINECRAFT_VERSION` и `MINECRAFT_LOADER`.
-- Логи помогают понять, какая версия была скачана. Лежат в `mods/sources/download_log.csv`.
+После каждого изменения `.env` или состава модов делай `make down && make up`.
 
-### 2. Ручные прямые ссылки
+## Настройка `.env`
 
-Если мода нет на Modrinth, используем fallback-скрипт `git/scripts/download_mods.sh`: в `mods/sources/server-mods.txt` / `mods/sources/client-mods.txt` указываем прямые URL (например, с CurseForge) и выполняем:
+1. **Шаблон** — `env/.env.example`. Его не редактируем.
+2. **Рабочие файлы** — `env/local.env` (для разработки) и `env/production.env`.
+3. Основные поля:
+   - `SERVER_PORT` — порт, который будет опубликован наружу.
+   - `MEMORY_MIN` / `MEMORY_MAX` — лимиты JVM (например `4G` и `6G`).
+   - `EULA=TRUE` — обязательно, иначе сервер не стартует.
+   - `SERVER_NAME`, `MAX_PLAYERS`, `DIFFICULTY`, `ONLINE_MODE`.
+   - `OPS=Player1,Player2` — список опов, чтобы сразу выдать админку.
+   - `FORGE_VERSION` и `FORGE_INSTALLER` — уже выставлены на 1.20.1/47.4.10. Если меняешь версию, не забудь заново запустить `make forge-installer`.
+4. Не нужно указывать IP — просто открой порт в фаерволе и расскажи игрокам внешний адрес вида `ip-вашего-сервера:25565`.
+5. Файл не коммитим: `.gitignore` уже закрывает все `env/*.env`.
+
+## Автозагрузка модов
+
+1. **Modrinth** — списки `mods/sources/modrinth-server.json` и `modrinth-client.json`.
+   - `make fetch-mods` → `git/scripts/fetch_modrinth.py` подтянет последние релизы Forge 1.20.1.
+   - Все загрузки логируются в `mods/sources/download_log.csv`.
+2. **CurseForge** — если моды есть только там (пример: FTB Ultimine).
+   - Получи `CURSEFORGE_API_KEY` на https://console.curseforge.com/.
+   - Добавь значение в `.env`, запусти `make fetch-mods`; тег из `mods/sources/curseforge.json` будет скачан автоматически.
+3. **Ручные ссылки** — заполняем `mods/sources/server-mods.txt` или `client-mods.txt`, затем:
+   ```bash
+   bash git/scripts/download_mods.sh server
+   ```
+4. **Forge installer** — `make forge-installer` (обёртка над `git/scripts/download_forge.sh`). Контейнер получает файл через volume `docker/artifacts -> /data/artifacts`, поэтому установка не зависит от DNS внутри контейнера.
+
+## Makefile команды
+
+| Команда             | Что делает                                                          |
+|---------------------|---------------------------------------------------------------------|
+| `make up`           | `docker compose up -d` с нужным `.env`                              |
+| `make down`         | останавливает и удаляет контейнер                                   |
+| `make restart`      | перезапуск                                                           |
+| `make logs`         | tail логов                                                           |
+| `make ps`           | статус контейнера                                                    |
+| `make clean`        | удаляет контейнер + тома (`data`, `logs`) после подтверждения       |
+| `make rebuild`      | пересобирает образ (после правок Dockerfile)                        |
+| `make fetch-mods`   | запускает Modrinth + CurseForge загрузчики                          |
+| `make forge-installer` | скачивает Forge installer в `docker/artifacts`                   |
+
+Все команды учитывают `ENV_FILE` (по умолчанию `env/local.env`). Для прод-окружения запускай так:
 
 ```bash
-bash git/scripts/download_mods.sh
+make ENV_FILE=env/production.env up
 ```
 
-Скрипт использует `curl`/`wget`, сохраняет файлы и ничего не скачивает повторно.
+## Подготовка клиента для игроков
 
-### 3. Forge installer
+1. Отправь ссылку на `docs/player-guide.md` — там пошагово описано, как установить Forge, где взять моды, как подключиться к серверу.
+2. Для ленивых игроков есть скрипт:
+   ```bash
+   bash git/scripts/install_client_mods.sh /путь/к/.minecraft/mods
+   ```
+   Он копирует все `.jar` из `mods/server` и `mods/client` в указанную папку. На Windows запускать из Git Bash.
 
-```bash
-bash git/scripts/download_forge.sh 1.20.1 47.2.0
-```
+## Продакшен на Linux
 
-Сохраняет оригинальный Forge installer в `docker/artifacts/` (вдруг решим собрать собственный образ).
+1. Следуй `docs/deploy-linux.md`: настрой Docker, открой порт 25565/TCP (`ufw`/`firewalld`/security group), склонируй репозиторий.
+2. Скопируй `.env`: `cp env/.env.example env/production.env`, задай реальные значения.
+3. Выполни `make forge-installer`, затем `make fetch-mods`.
+4. Запусти `make up ENV_FILE=env/production.env`.
+5. Проверь `make logs` и подключись по внешнему IP (`minecraft.example.com:25565`).
 
-### 4. CurseForge API (для модов без прямых ссылок)
+## Отладка и типичные проблемы
 
-- Заполни `mods/sources/curseforge.json` (пример уже добавлен для `FTB Ultimine`).
-- Получи API-ключ: https://console.curseforge.com/ и впиши его в `env/local.env` (строка `CURSEFORGE_API_KEY=`). Реальное значение не коммитим.
-- Запусти `make fetch-mods` или напрямую:
+- **Порт занят** — `make up` вернул `port is already allocated`. Останови старый контейнер (`docker ps`, `docker stop <id>`) или поменяй `SERVER_PORT`.
+- **Forge не ставится** — убедись, что заранее скачал installer (`make forge-installer`). Теперь контейнер не ходит в интернет за установщиком, поэтому DNS-проблем не будет.
+- **Краш из-за зависимостей модов** — скрипты уже подхватывают `structure_gel`, `resourcefulconfig`, `sophisticatedcore` и т.д. Если добавляешь новые моды вручную, не забудь указать их зависимости в `docs/modpack.md` и в JSON‑списках.
+- **Игра не видит сервер** — проверь `make ps`, `make logs`, затем убедись, что порт реально открыт (на VPS: `sudo ufw status`, `nmap your.ip -p 25565`, canyouseeme.org).
 
-```bash
-py git/scripts/fetch_curseforge.py
-```
+## Чем ещё полезен репозиторий
 
-Скрипт сам найдёт свежую версию под Minecraft `1.20.1`, скачает `.jar` в `mods/server` и добавит запись в `download_log.csv`. Если ключа нет, он вежливо напомнит.
+- `docs/modpack.md` — подробное описание каждого мода, зависимости, ссылки на проекты.
+- `docs/player-guide.md` — понятная инструкция для игроков (даже для тех, кто впервые ставит моды).
+- `docs/deploy-linux.md` — чек-лист для деплоя на VPS/дедик с комментариями по бэкапам.
+- `PLAN.md` — дорожная карта и принятые решения (можно использовать как ТЗ).
 
-## Работа с `.env` (для чайника)
-
-1. **Шаблон** — `env/.env.example`. Его нельзя трогать, он всегда актуальный.
-2. **Локальный запуск** — копируй шаблон в `env/local.env`: `cp env/.env.example env/local.env`.
-3. **Прод-сервер** — копируй в `env/production.env` и меняй значения под удалённый хост.
-4. Минимум, что нужно заполнить: `SERVER_PORT`, `EULA=TRUE`, `SERVER_NAME`, `MEMORY_MIN/MAX`, при необходимости `OPS=Nickname1,Nickname2`.
-5. Если сервер крутится на удалённом хосте, убедись, что **IPv4-адрес открыт наружу** и порт из `SERVER_PORT` проброшен в фаерволе/роутере (иначе игроки не подключатся). Никакой IP в `.env` указывать не нужно — просто сообщай игрокам внешний адрес (например, `123.45.67.89:25565`).
-6. Остальные параметры (`DIFFICULTY`, `MAX_PLAYERS` и т.д.) можно править позже — главное, чтобы строки были без пробелов и кавычек.
-7. Никогда не коммить реальные `.env` — добавим их в `.gitignore`, а нужные значения описываем в документации.
-8. Для выдачи админки используй `OPS=Player1,Player2` — образ автоматически обновит `ops.json`.
-
-### Как открыть порт
-
-> Продакшен/боевой деплой планируем исключительно на Linux-серверах (VPS/dedicated). Windows-инструкции оставлены только для локальных тестов. Полный гайд смотри в `docs/deploy-linux.md`.
-
-1. **На Linux-сервере (VPS)**
-   - Разреши порт в `ufw`: `sudo ufw allow 25565/tcp`.
-   - Если используешь `firewalld`: `sudo firewall-cmd --add-port=25565/tcp --permanent && sudo firewall-cmd --reload`.
-   - Проверь хостинг-панель (DigitalOcean/AWS и т.п.) — там может быть свой security group, тоже добавь правило.
-2. **На Windows + Docker Desktop (локальные тесты)**
-   - Убедись, что Docker слушает на `0.0.0.0`.
-   - В Windows Firewall добавь входящее правило для TCP-порта из `SERVER_PORT`.
-   - Если за NAT, пробрось порт на роутере.
-3. **Проверка**
-   - После запуска `make up` зайди на внешний IP с другого устройства (`minecraft.example.com:25565`).
-   - Можно протестировать через `nmap your.ip -p 25565` или сервисы типа canyouseeme.org.
-
-## Деплой на Linux (кратко)
-
-1. SSH на сервер → `curl -fsSL https://get.docker.com | sh` → добавить пользователя в группу docker.
-2. `git clone <repo>` и перейти в каталог.
-3. `cp env/.env.example env/production.env` и заполнить значения.
-4. Открыть порт 25565/TCP (`ufw`/`firewalld`/Security Group).
-5. `make up ENV_FILE=env/production.env`.
-6. Проверить `make logs` + подключение клиента по IP:порт.
-
-> Подробный чек-лист и инструкции лежат в `docs/deploy-linux.md`. Там же подсказки по бэкапам и обновлениям.
-
-Если что-то не работает — убедись, что контейнер запущен (`make ps`), в логах нет ошибок (`make logs`), и порт действительно открыт во всех слоях (Docker → ОС → роутер → провайдер).
-
-## Makefile-команды (план без реализации)
-
-Пока нет самого `Makefile`, но UX мы уже определили. Команды будут простыми:
-
-- `make up` — создать контейнер и запустить сервер.
-- `make down` — остановить и удалить контейнер (оставляя миры).
-- `make restart` — быстрый перезапуск (вызывает `down` + `up`).
-- `make logs` — показать логи сервера в реальном времени.
-- `make ps` — статус контейнера и портов.
-- `make clean` — снести контейнер и связанные тома (использовать осторожно).
-- `make rebuild` — пересобрать Docker-образ, если меняли Dockerfile.
-
-На будущее (в отдельном спринте) хотим добавить `make backup`, `make restore`, `make update-mods`, но сначала реализуем базовый набор.
-
-## Как читать план
-
-В `PLAN.md` лежит полный документ: требования, стек, структура проекта, политика по `.env`, модам, Makefile-командам, план тестирования и дорожная карта. Он написан “по-русски и для чайника”, с комментариями по каждому разделу.
-
-## Что дальше
-
-1. **Спринт 1** ✅ — структура репо + базовый план (`PLAN.md`).
-2. **Спринт 2** (в работе) — документация по модам, описание Makefile-команд и `.env`.
-3. **Спринт 3** — добавить шаблоны (Makefile, Compose, Dockerfile) и инструкции по запуску.
-
-Команды `make` и Docker-часть появятся после утверждения плана. Если нужно что-то поменять — просто скажи, и поправим до того, как перейдём к реализации.
-
----
-
-**Важно:** этот проект специально задуман без CI/CD и прочей “магии”. Всё будет максимально просто и прозрачно: скачал репо, поправил `.env`, положил моды, запустил `make up`.
+Если нужна дополнительная автоматизация (бэкапы, обновление модов по расписанию, развёртывание на отдельном сервере) — пишите, добавим отдельными спринтами.

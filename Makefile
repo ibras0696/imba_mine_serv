@@ -15,7 +15,7 @@ ENV_FILE ?= env/local.env
 DOCKER_COMPOSE := docker compose
 PYTHON ?= py
 
-.PHONY: help up down restart logs ps clean rebuild fetch-mods forge-installer
+.PHONY: help up down restart logs ps clean rebuild fetch-mods forge-installer op
 
 help:
 	@echo "Доступные команды:"
@@ -27,6 +27,7 @@ help:
 	@echo "  make clean      - удалить контейнер и связанные тома (осторожно)"
 	@echo "  make rebuild    - пересобрать образ (после правок Dockerfile)"
 	@echo "  make forge-installer - download Forge installer into docker/artifacts"
+	@echo "  make op PLAYER=Name - grant op via docker exec rcon"
 
 up:
 	@if [ ! -f "$(ENV_FILE)" ]; then \
@@ -74,3 +75,11 @@ forge-installer:
 	fi
 	@set -a; . $(ENV_FILE); set +a; \
 		bash git/scripts/download_forge.sh "$${MC_VERSION:-1.20.1}" "$${FORGE_VERSION:-47.4.10}"
+
+
+op:
+	@if [ -z "$(PLAYER)" ]; then \
+		echo "Usage: make op PLAYER=Nickname"; \
+		exit 1; \
+	fi
+	docker exec forge-server rcon-cli op $(PLAYER)

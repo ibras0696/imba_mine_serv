@@ -41,10 +41,11 @@
 | 9 | Flywheel | Server + Client | Рендер/эффекты для Create | — |
 |10 | Immersive Engineering | Server + Client | Проводка, генераторы, производство | — |
 |11 | Ad Astra (Forge) | Server + Client | Космос, ракеты, новые планеты | Architectury API, Botarium, Resourceful Lib |
-|12 | Architectury API | Server + Client | Библиотека для мультиплатформенных модов | — |
-|13 | Botarium | Server + Client | Хранение ресурсов/энергии | — |
-|14 | Resourceful Lib | Server + Client | Библиотека для Ad Astra и др. | — |
-|15 | Advanced Mining Dimension | Server + Client | Отдельное шахтёрское измерение | — |
+|12 | Superb Warfare | Server + Client | Military vehicles, artillery, firearms | Curios API, GeckoLib |
+|13 | Architectury API | Server + Client | Библиотека для мультиплатформенных модов | — |
+|14 | Botarium | Server + Client | Хранение ресурсов/энергии | — |
+|15 | Resourceful Lib | Server + Client | Библиотека для Ad Astra и др. | — |
+|16 | Advanced Mining Dimension | Server + Client | Отдельное шахтёрское измерение | — |
 
 ---
 
@@ -52,7 +53,7 @@
 
 | # | Мод | Где нужен | Главная функция | Зависимости |
 |---|-----|-----------|-----------------|-------------|
-|16 | Terralith | Server + Client | Дополнительные биомы и террейны | — |
+|17 | Terralith | Server + Client | Дополнительные биомы и террейны | — |
 
 ---
 
@@ -60,13 +61,13 @@
 
 | # | Мод | Где нужен | Главная функция | Зависимости |
 |---|-----|-----------|-----------------|-------------|
-|17 | FTB Ultimine | Server + Client | Копание жил/деревьев целиком | — |
-|18 | Sophisticated Backpacks | Server + Client | Продвинутые рюкзаки | — |
-|19 | Iron Chests | Server + Client | Улучшенные сундуки | — |
-|20 | AppleSkin | Client-only (можно и на сервер) | Полоски голода/сытости | — |
-|21 | Curios API | Server + Client | Доп. слоты под аксессуары | — |
-|22 | Cloth Config API | Server + Client | Меню настроек модов | — |
-|23 | Balm | Server + Client (если просит мод) | Техническая библиотека | — |
+|18 | FTB Ultimine | Server + Client | Копание жил/деревьев целиком | — |
+|19 | Sophisticated Backpacks | Server + Client | Продвинутые рюкзаки | — |
+|20 | Iron Chests | Server + Client | Улучшенные сундуки | — |
+|21 | AppleSkin | Client-only (можно и на сервер) | Полоски голода/сытости | — |
+|22 | Curios API | Server + Client | Доп. слоты под аксессуары | — |
+|23 | Cloth Config API | Server + Client | Меню настроек модов | — |
+|24 | Balm | Server + Client (если просит мод) | Техническая библиотека | — |
 
 ---
 
@@ -74,14 +75,14 @@
 
 | # | Мод | Где нужен | Главная функция | Зависимости/заметки |
 |---|-----|-----------|-----------------|----------------------|
-|24 | JEI (Just Enough Items) | Client-only | Показ рецептов/квестов | — |
-|25 | Jade / Hwyla | Client-only | Информация о блоке при наведении | — |
-|26 | Embeddium | Client-only | Оптимизация FPS (Forge версия Sodium) | — |
-|27 | Oculus | Client-only | Поддержка шейдеров | Требует Embeddium |
-|28 | FerriteCore | Client-only (на сервер не обязательно) | Экономия RAM | — |
-|29 | JourneyMap | Client-only | Миникарта/карта мира | — |
-|30 | Shader Packs | Client-only | Любые шейдеры | Работают через Oculus |
-|31 | GUI/Интерфейсные моды | Client-only | Любые визуальные интерфейсы | — |
+|25 | JEI (Just Enough Items) | Client-only | Показ рецептов/квестов | — |
+|26 | Jade / Hwyla | Client-only | Информация о блоке при наведении | — |
+|27 | Embeddium | Client-only | Оптимизация FPS (Forge версия Sodium) | — |
+|28 | Oculus | Client-only | Поддержка шейдеров | Требует Embeddium |
+|29 | FerriteCore | Client-only (на сервер не обязательно) | Экономия RAM | — |
+|30 | JourneyMap | Client-only | Миникарта/карта мира | — |
+|31 | Shader Packs | Client-only | Любые шейдеры | Работают через Oculus |
+|32 | GUI/Интерфейсные моды | Client-only | Любые визуальные интерфейсы | - |
 
 ---
 
@@ -89,7 +90,7 @@
 
 ### ✔ Обязательно на сервер и клиент
 
-`When Dungeons Arise`, `Dungeons Plus`, `YUNG's Better Series`, `YUNG’s API`, `Ars Nouveau`, `Patchouli`, `GeckoLib`, `Create`, `Flywheel`, `Immersive Engineering`, `Ad Astra`, `Architectury API`, `Botarium`, `Resourceful Lib`, `Advanced Mining Dimension`, `Terralith`, `FTB Ultimine`, `Sophisticated Backpacks`, `Iron Chests`, `Curios API`, `Cloth Config API`, `Balm*`
+`When Dungeons Arise`, `Dungeons Plus`, `YUNG's Better Series`, `YUNG’s API`, `Ars Nouveau`, `Patchouli`, `GeckoLib`, `Create`, `Flywheel`, `Immersive Engineering`, `Ad Astra`, `Superb Warfare`, `Architectury API`, `Botarium`, `Resourceful Lib`, `Advanced Mining Dimension`, `Terralith`, `FTB Ultimine`, `Sophisticated Backpacks`, `Iron Chests`, `Curios API`, `Cloth Config API`, `Balm*`
 
 > `Balm` нужен только если какой-то мод его требует — это будет указано в инструкции.
 

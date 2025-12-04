@@ -32,3 +32,5 @@ compose/*.override.yml
 
 # локальные утилиты (plink, вспомогательные бинарники)
 tools/
+
+ts_mods/

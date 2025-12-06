@@ -1,6 +1,3 @@
-# Docker Compose для запуска Forge 1.20.1 сервера.
-# Вся конфигурация подтягивается из env/local.env или env/production.env.
-
 services:
   minecraft:
     container_name: forge-server
@@ -25,20 +22,17 @@ services:
       DIFFICULTY: "${DIFFICULTY}"
       MAX_PLAYERS: "${MAX_PLAYERS}"
       ONLINE_MODE: "${ONLINE_MODE}"
+      OPS: "${OPS}"
       LEVEL_NAME: "${LEVEL_NAME}"
       VIEW_DISTANCE: "${VIEW_DISTANCE}"
       ALLOW_NETHER: "${ALLOW_NETHER}"
+      ALLOW_FLIGHT: "${ALLOW_FLIGHT}"
       PVP: "${PVP}"
       ENABLE_COMMAND_BLOCK: "${ENABLE_COMMAND_BLOCK}"
 
     volumes:
-      # Миры и игроки
       - ../data/world:/data/world
-      # Конфиги модов
       - ../config:/data/config
-      # Серверные моды (папка mods/server внутри репозитория)
       - ../mods/server:/data/mods
-      # Логи сервера (полезно для отладки)
       - ../logs:/data/logs
-      # Forge installer и прочие артефакты, чтобы не качать внутри контейнера
       - ../docker/artifacts:/data/artifacts

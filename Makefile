@@ -26,8 +26,8 @@ help:
 	@echo "  make ps         - статус контейнера"
 	@echo "  make clean      - удалить контейнер и связанные тома (осторожно)"
 	@echo "  make rebuild    - пересобрать образ (после правок Dockerfile)"
-	@echo "  make forge-installer - download Forge installer into docker/artifacts"
-	@echo "  make op PLAYER=Name - grant op via docker exec rcon"
+	@echo "  make forge-installer - скачать Forge installer в docker/artifacts"
+	@echo "  make op PLAYER=Ник - выдать опку через rcon-cli"
 
 up:
 	@if [ ! -f "$(ENV_FILE)" ]; then \
@@ -35,6 +35,11 @@ up:
 		exit 1; \
 	fi
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d
+	@if docker ps --format '{{.Names}}' | grep -q '^forge-server$$'; then \
+		bash git/scripts/grant_ops.sh "$(ENV_FILE)" "make-up"; \
+	else \
+		echo "forge-server не запущен, пропускаю grant_ops"; \
+	fi
 
 down:
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) down
@@ -75,7 +80,6 @@ forge-installer:
 	fi
 	@set -a; . $(ENV_FILE); set +a; \
 		bash git/scripts/download_forge.sh "$${MC_VERSION:-1.20.1}" "$${FORGE_VERSION:-47.4.10}"
-
 
 op:
 	@if [ -z "$(PLAYER)" ]; then \

@@ -10,6 +10,10 @@ COMPOSE_FILE="$REPO_ROOT/compose/docker-compose.yml"
 cd "$REPO_ROOT"
 
 if docker ps --format '{{.Names}}' | grep -q '^forge-server$'; then
+  for sec in $(seq 15 -1 1); do
+    docker exec forge-server rcon-cli say "[auto-restart] Перезапуск через ${sec} сек" >/dev/null 2>&1 || true
+    sleep 1
+  done
   docker exec forge-server rcon-cli say "[auto-restart] Saving world before restart..." >/dev/null 2>&1 || true
   docker exec forge-server rcon-cli save-all flush >/dev/null 2>&1 || true
   sleep 2

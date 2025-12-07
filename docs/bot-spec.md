@@ -1,92 +1,139 @@
-# Техническое задание: Telegram‑бот для управления сервером
+# Telegram Bot Specification
 
-## 1. Цель
+## 1. Goal
 
-Создать Telegram‑бота на **Python + aiogram 3.x**, который позволит администраторам удалённо управлять Minecraft-сервером и получать уведомления о его состоянии. Бот не заменяет Makefile/SSH, а упрощает типовые операции: запуск/остановка, просмотр логов, выдача опки, обновление `.env`, контроль модов.
+Build a lightweight Telegram bot (Python + aiogram 3.x) that lets the owner administer the Minecraft Forge server without touching the shell: start/stop/restart the container, inspect logs, change `.env`, manage mods/backups, and broadcast quick notifications. The bot should expose all critical actions via inline buttons so that the user can tap instead of typing commands, while text commands remain available for power users.
 
-## 2. Пользовательские сценарии
+## 2. Functional Requirements
 
-1. **Авторизация** — бот отвечает только списку Telegram ID, перечисленных в `.env.bot` (`TELEGRAM_ADMINS`). Остальным пишет, что доступ запрещён.  
-2. **Запуск/остановка** — команды `/up`, `/down`, `/restart` вызывают `make` в директории `/root/imba_mine_serv`. Бот возвращает exit-code и выдержку из логов.  
-3. **Статус сервера** — `/status` показывает: работает ли контейнер (`docker compose ps`), сколько игроков на сервере (через `mc-monitor status` или `rcon-cli list`), текущий TPS и RAM.  
-4. **Логи** — `/logs 50` присылает последние N строк `docker compose logs`. Для длинных логов бот прикрепляет txt-файл.  
-5. **Управление опкой** — `/op ibrass`, `/deop player` используют `docker exec forge-server rcon-cli`. Бот валидирует никнейм и сообщает об успехе.  
-6. **Работа с `.env`** — `/env get KEY` выводит значение, `/env set KEY VALUE` редактирует файл (с бэкапом). После применения бот предлагает `/restart`, но не делает его автоматически.  
-7. **Моды** — `/mods server` и `/mods client` перечисляют версии из `docs/modpack.md` + реальные `.jar` в каталоге. `/mods upload` принимает архив/файл, сохраняет в `ts_mods/inbox`, а админ применяет позже.  
-8. **Уведомления** — подписка `/subscribe crashes` и `/subscribe joins`. Бот следит за `logs/latest.log` (tail -F) и присылает события: вход/выход игроков, ошибки Forge, нехватка модов.  
-9. **Бэкапы** — `/backup now` запускает скрипт создания архива мира (`make backup`). По завершении бот шлёт ссылку на архив или подтверждение.  
-10. **Git/деплой** (расширенный сценарий) — `/git pull`, `/deploy` для обновления репозитория на VPS и рестарта сервера.
+1. **Auth & Roles** – only a whitelist of Telegram IDs (defined in `.env.bot` via `TELEGRAM_ADMINS`) may use the bot. No moderator role is required: either you are the owner (full access) or rejected.
+2. **Server control** – `/up`, `/down`, `/restart`, `/ps`, `/logs` invoke `make`/`docker compose` inside `/root/imba_mine_serv`. Each action must provide inline buttons:
+   - Main menu buttons: `🟢 Up`, `🔴 Down`, `♻️ Restart`, `📊 Status`, `📜 Logs (tail 100)`, `🧹 Clean`.
+   - Confirm dangerous actions (down/restart/clean) with inline “✅ Подтвердить” + “❌ Отмена”.
+3. **Status** – `/status` shows: container state (`docker compose ps`), number of players (via `rcon-cli list` or `mc-monitor status`), JVM RAM usage (parse `docker stats` / `mc-monitor`). Result displayed as text + inline buttons (`🔁 Обновить`, `⬅️ Назад`).
+4. **Logs** – `/logs 100` or inline “📜 Logs” button fetches `docker compose logs -n N`. For long outputs send as a file; otherwise send as text. Provide an inline selector (`Logs 50`, `Logs 200`).
+5. **OP management** – `/op nickname`, `/deop nickname`, plus shortcuts: inline buttons “Опнуть ibrass”, “Снять ibrass”. All commands go through `docker exec forge-server rcon-cli`.
+6. **.env editing** – `/env get KEY`, `/env set KEY VALUE` (with inline confirmation). After a successful change offer buttons `♻️ Перезапустить` or `❌ Отмена`. Always create backups (`env/.env.bot.bak`).
+7. **Mod management** – `/mods server`, `/mods client` read `docs/modpack.md` to display tables. Button “📥 Загрузить мод” allows uploading `.jar`; bot saves into `ts_mods/inbox` and reports the path. Additional inline button “📦 Список новых jar”.
+8. **Backups** – `/backup now` (inline “Создать бэкап”); runs `make backup` (to be implemented). Provide a download link/path once done. Later add `/backup list`.
+9. **Subscriptions** – inline toggle “🔔 Краш-алерты”, “👥 Join/Leave”. The notifier tails `logs/latest.log` (async thread) and sends messages with inline “📜 Открыть лог”.
+10. **Git/Deploy** – “⬇️ Pull & Restart” button executes `git pull`, `make up`, with double confirmation.
 
-## 3. Архитектура
+## 3. UI & UX
+
+- Every command that matters must have inline buttons; use reply keyboards only for global navigation (e.g., “Главное меню”, “Отмена”).
+- Callback data format: `action=restart`, `action=logs:100`, `action=env_set:key`. Keep it short (<64 bytes).
+- Implement a simple state machine per user for multi-step flows (`/env set`, `/mods upload`). aiogram FSM or custom dictionary is acceptable.
+
+## 4. Architecture
 
 ```
 bot/
- ├── main.py              # точка входа aiogram
- ├── config.py            # чтение .env.bot
- ├── handlers/            # модули commands/logs/env/mods/ops/status
- ├── services/
- │    ├── shell.py        # запуск make/docker/ssh команд (async subprocess)
- │    ├── rcon.py         # обёртка над rcon-cli
- │    ├── env_file.py     # чтение/запись .env с бэкапами
- │    ├── modpack.py      # парсинг docs/modpack.md
- │    └── notifier.py     # tail логов, отправка алертов
- ├── data/
- │    ├── bot.log
- │    └── state.json      # текущие подписки на уведомления
- └── README.md            # инструкция по запуску бота
+  main.py               # aiogram entrypoint, router wiring
+  config.py             # load .env.bot, parse tokens/IDs
+  keyboards.py          # inline & reply builders
+  handlers/
+     menu.py            # /start, menu navigation
+     status.py          # /status, /ps
+     control.py         # up/down/restart/logs buttons
+     env.py             # get/set env flows
+     mods.py            # list/upload mods
+     ops.py             # op/deop shortcuts
+     backup.py          # backup commands
+  services/
+     shell.py           # async subprocess runner (make/docker)
+     rcon.py            # wrapper around rcon-cli
+     env_file.py        # read/write env with backup
+     modpack.py         # parse docs/modpack.md
+     notifier.py        # tail logs, manage subscriptions
+     ssh_fallback.py    # plink/ssh fallback (see section 7)
+  data/
+     bot.log
+     state.sqlite       # optional storage (see section 6)
+  README.md             # setup instructions
 ```
 
-- **Деплой**: бот работает на том же VPS, что и сервер, в отдельном systemd-юните (`/etc/systemd/system/imba-bot.service`).  
-- **Доступ к серверу**: команды выполняются локально, т.к. бот живёт на той же машине. На стадии теста можно запускать бота на ПК и подключаться к VPS через SSH (используем `asyncssh` или `paramiko`).  
-- **Конфигурация**: файл `env/.env.bot` с переменными `BOT_TOKEN`, `TELEGRAM_ADMINS`, `WORKDIR=/root/imba_mine_serv`, `ENV_FILE=env/production.env`, `RCON_PASSWORD`, `RCON_PORT=25575`.
+- Bot runs on the same VPS (`/root/imba_mine_serv`) via systemd unit `/etc/systemd/system/imba-bot.service`.
+- Shell commands must be async (use `asyncio.create_subprocess_shell` or `aiosubprocess`) to avoid blocking.
+- Long-running tasks (log tail, notifier) run in background tasks started at startup and cancelled on shutdown.
 
-## 4. Безопасность
+## 5. Security & Logging
 
-- Бот принимает команды только от whitelisted ID.  
-- Каждое действие логируется с указанием пользователя, команды и результата (`bot/data/bot.log`).  
-- Для операций, которые меняют файлы (`/env set`, `/mods upload`), бот делает резервную копию (`.bak` + отметка во внутреннем state). В случае сбоя можно откатить `/env undo`.  
-- Ограничение скорости: не более X команд в минуту на пользователя (anti-spam).  
-- Команда `/shell` (сырые команды) закрыта и выключена, пока админ явно не откроет через конфиг.  
-- Токен Telegram хранится только в `.env.bot`, файл добавлен в `.gitignore`.  
-- В `docker-compose` для бота лучше настроить отдельный пользователь (не root) или запускать через virtualenv/systemd с ограниченными правами.
+- All sensitive actions are logged into `bot/data/bot.log` with timestamp, Telegram ID, command, exit code.
+- Backups: before editing `.env` or other files, create `*.bak` copies with timestamp.
+- Rate limit: no more than 5 actions per user per minute for destructive commands.
+- `/shell` command is disabled entirely for now. Only specific, hardcoded operations exposed via inline buttons or slash commands.
+- `.env.bot` is never committed; remains in `.gitignore`.
 
-## 5. Требования к реализации
+## 6. Persistence
 
-1. **Python 3.11+**, aiogram 3.x, `python-dotenv`, `aiofiles`, `asyncio`.  
-2. Обособленный виртуальное окружение (`python -m venv .venv && source .venv/bin/activate`).  
-3. Makefile‑таргеты для бота:  
-   - `make bot-install` — установка зависимостей (`pip install -r bot/requirements.txt`).  
-   - `make bot-run` — запуск dev-режима (`python -m bot.main`).  
-   - `make bot-service` — генерация systemd-юнита.  
-4. Покрыть критические части юнит-тестами (например, парсер `.env`, обработчик `/env set`).  
-5. Описать процесс деплоя в `docs/bot-spec.md` + `docs/deploy-linux.md` (добавить раздел «Бот»).  
-6. В логах бота не должно быть токена, пароля rcon и других секретов.  
-7. Исключения должны красиво обрабатываться и возвращать пользователю понятное сообщение.
+- By default store runtime state (subscriptions, pending confirmations) in memory.
+- If persistence is needed (Bot restarts frequently), use `sqlite3` via `aiosqlite`. Keep schema minimal:
+  ```
+  subscriptions(user_id INTEGER PRIMARY KEY,
+                crashes BOOLEAN,
+                joins BOOLEAN)
+  ```
+- No external DB is required; if persistence is unnecessary, skip SQLite entirely.
 
-## 6. Бэклог по спринтам
+## 7. Command Execution Layer
 
-| Спринт | Задачи |
-|--------|--------|
-| 1 | Базовые команды `/start`, `/help`, `/status`, оболочка для запуска shell-команд, `.env.bot`. |
-| 2 | `/up`, `/down`, `/restart`, `/logs`, `/ps`, уведомления об ошибках (tail log). |
-| 3 | `/op`, `/deop`, `/env get/set`, `/mods server/client`. |
-| 4 | Загрузка файлов `/mods upload`, `/backup now`, интеграция с `make fetch-mods`. |
-| 5 | Подписки на события, кастомные алерты (краши, join/leave), интеграция с Git (`/git pull`). |
-| 6 | Тестирование, написание README, упаковка в systemd‑юнит, финальный аудит безопасности. |
+1. **Local shell** – primary mechanism: run `make` and `docker compose` commands directly on the VPS (bot is deployed there).
+2. **Dry-run mode** – add `BOT_DRY_RUN=1` (in `.env.bot`) to log the commands instead of executing. Useful for development on laptops without Docker.
+3. **Fallback SSH** – when bot runs off-host (Windows desktop) it must be able to execute commands via SSH/Plink:
+   - Use `PLINK_PATH` and `SSH_HOST` from `.env.bot`.
+   - For each operation, decide whether to run locally or via SSH (flag `BOT_REMOTE=1`).
+   - Wrap calls so that command templates are re-used (no duplication between local/remote).
 
-## 7. Риски и контроль
+## 8. Notifications
 
-- **Некорректные команды в `.env`** — добавляем валидацию (белый список ключей, проверка значений).  
-- **Конкурентный доступ** — если другой админ вручную редактирует `.env`, бот должен перечитывать файл перед записью и предупреждать о конфликтах.  
-- **Зависание make/docker** — ставим таймауты (например, 120 секунд) и возвращаем ошибку, если команда не завершилась.  
-- **Спам уведомлениями** — возможность отключить подписку `/unsubscribe crashes`.  
-- **Падение бота** — systemd рестартует процесс. В боте реализуем healthcheck (пинг в лог каждые N минут).  
-- **Токен Telegram** — хранится только в `.env.bot`, в коде не хардкодим.
+- Create a notifier service that tails `/root/imba_mine_serv/logs/latest.log` (or uses `journalctl -fu imba-mine.service`).
+- When a crash or specific regex appears, send message with inline buttons:
+  - “📜 Лог (50 строк)” -> fetch latest lines.
+  - “🔁 Перезапустить” -> confirm restart.
+- Join/Leave events: parse `latest.log` lines containing `logged in` / `left the game`, format message `👤 <nick> вошёл`.
 
-## 8. Готовность к реализации
+## 9. Deployment Requirements
 
-- Репозиторий уже содержит все скрипты для управления сервером, поэтому бот в основном будет вызывать `make` и `docker`.  
-- Для RCON понадобится включить `ENABLE_RCON=TRUE`, задать `RCON_PASSWORD` и прокинуть порт в контейнер. Это изменение нужно зафиксировать в `.env.example` и `compose/docker-compose.yml`.  
-- После оценки ТЗ можно приступать к sprint 1: создать заготовку `bot/`, прописать зависимости и добавить минимум `/start`, `/help`, `/status`.
+1. Add `make bot-install`, `make bot-run`, `make bot-service` to root Makefile.
+2. Provide `docs/bot-spec.md` (this file) and extend `docs/deploy-linux.md` with bot deployment steps.
+3. Systemd unit example:
+   ```
+   [Unit]
+   Description=Imba Telegram Bot
+   After=network-online.target docker.service
 
-Документ можно использовать как основу для issue на GitHub или план-график в Notion/Jira.
+   [Service]
+   WorkingDirectory=/root/imba_mine_serv
+   ExecStart=/root/imba_mine_serv/.venv/bin/python -m bot.main
+   EnvironmentFile=/root/imba_mine_serv/env/.env.bot
+   Restart=on-failure
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+
+## 10. Roadmap
+
+| Sprint | Scope |
+|--------|-------|
+| 1 | Skeleton (`bot/`), `.env.bot`, `/start`, `/help`, `/status`, inline main menu. |
+| 2 | `/up`, `/down`, `/restart`, `/logs`, `/ps`, inline confirmations, dry-run flag. |
+| 3 | `/op`, `/deop`, `/env get/set` with buttons and backups. |
+| 4 | Mods listing/upload, backup commands, notifier scaffold. |
+| 5 | Subscriptions (crash, join/leave), tail-based notifications, Git/Deploy buttons. |
+| 6 | Polish: README, systemd unit, ssh fallback support, error reporting, tests. |
+
+## 11. Testing & Dry-run
+
+- Each command handler should have unit tests for parsing and formatting (use pytest).
+- Provide a `BOT_DRY_RUN=1` mode in `.env.bot`. In dry-run, the bot logs command strings without executing them and replies with “(dry-run)”.
+- Manual QA checklist: start bot in dry-run on local machine, tap each inline button, verify logs.
+
+## 12. Next Steps
+
+1. Update repository README to mention bot capabilities and inline controls.
+2. Create `bot/requirements.txt`, scaffolding files, and implement sprint 1.
+3. When ready, deploy via `make bot-install`, `make bot-service`, and enable systemd service.
+
+This specification supersedes the previous version and explicitly covers inline UI, dry-run fallback, and SSH/Plink execution paths. Use it as the checklist before writing code.

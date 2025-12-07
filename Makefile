@@ -14,8 +14,11 @@ COMPOSE_FILE := compose/docker-compose.yml
 ENV_FILE ?= env/local.env
 DOCKER_COMPOSE := docker compose
 PYTHON ?= py
+PLINK ?= tools/plink.exe
+SSH_HOST ?= root@83.147.246.160
+SSH_PASSWORD ?=
 
-.PHONY: help up down restart logs ps clean rebuild fetch-mods forge-installer op
+.PHONY: help up down restart logs ps clean rebuild fetch-mods forge-installer op op-ibrass remote-op-ibrass
 
 help:
 	@echo "Доступные команды:"
@@ -87,3 +90,12 @@ op:
 		exit 1; \
 	fi
 	docker exec forge-server rcon-cli op $(PLAYER)
+
+op-ibrass:
+	$(MAKE) op PLAYER=ibrass
+
+remote-op-ibrass:
+ifndef SSH_PASSWORD
+	$(error SSH_PASSWORD not set. Run: make remote-op-ibrass SSH_PASSWORD=...)
+endif
+	$(PLINK) -ssh $(SSH_HOST) -pw "$(SSH_PASSWORD)" "docker exec forge-server rcon-cli op ibrass"

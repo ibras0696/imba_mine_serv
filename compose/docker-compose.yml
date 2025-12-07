@@ -22,7 +22,6 @@ services:
       DIFFICULTY: "${DIFFICULTY}"
       MAX_PLAYERS: "${MAX_PLAYERS}"
       ONLINE_MODE: "${ONLINE_MODE}"
-      OPS: "${OPS}"
       LEVEL_NAME: "${LEVEL_NAME}"
       VIEW_DISTANCE: "${VIEW_DISTANCE}"
       ALLOW_NETHER: "${ALLOW_NETHER}"

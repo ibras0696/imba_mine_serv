@@ -17,7 +17,12 @@ Build a lightweight Telegram bot (Python + aiogram 3.x) that lets the owner admi
 7. **Mod management** – `/mods server`, `/mods client` read `docs/modpack.md` to display tables. Button “📥 Загрузить мод” allows uploading `.jar`; bot saves into `ts_mods/inbox` and reports the path. Additional inline button “📦 Список новых jar”.
 8. **Backups** – `/backup now` (inline “Создать бэкап”); runs `make backup` (to be implemented). Provide a download link/path once done. Later add `/backup list`.
 9. **Subscriptions** – inline toggle “🔔 Краш-алерты”, “👥 Join/Leave”. The notifier tails `logs/latest.log` (async thread) and sends messages with inline “📜 Открыть лог”.
-10. **Git/Deploy** – “⬇️ Pull & Restart” button executes `git pull`, `make up`, with double confirmation.
+10. **Mod fetcher / parser** – inline flow “🔍 Найти мод”:
+    - User types search text → bot queries Modrinth API (primary source). Results come with buttons `⬇️ Скачать`, `⚙️ Установить`, `🔗 Ссылка`.
+    - If Modrinth has no match or user pastes a direct URL (Modrinth/CurseForge), bot downloads via `curl/wget` into `mods/server` (or staging), then replies with status + attaches the `.jar` for players.
+    - Bot tries to detect whether the mod is server-compatible (using Modrinth metadata tag `server_side`) and warns if unknown.
+    - Whenever a mod is installed, bot appends entry to `mods/sources/server-mods.txt` (or JSON) with name/version/link/date.
+11. **Git/Deploy** – “⬇️ Pull & Restart” button executes `git pull`, `make up`, with double confirmation.
 
 ## 3. UI & UX
 
@@ -120,9 +125,9 @@ bot/
 | 1 | Skeleton (`bot/`), `.env.bot`, `/start`, `/help`, `/status`, inline main menu. |
 | 2 | `/up`, `/down`, `/restart`, `/logs`, `/ps`, inline confirmations, dry-run flag. |
 | 3 | `/op`, `/deop`, `/env get/set` with buttons and backups. |
-| 4 | Mods listing/upload, backup commands, notifier scaffold. |
+| 4 | Mods listing/upload, mod search & parser (Modrinth API + direct-link fallback), backup commands, notifier scaffold. |
 | 5 | Subscriptions (crash, join/leave), tail-based notifications, Git/Deploy buttons. |
-| 6 | Polish: README, systemd unit, ssh fallback support, error reporting, tests. |
+| 6 | Polish: README, systemd unit, ssh/dry-run QA, tests. |
 
 ## 11. Testing & Dry-run
 

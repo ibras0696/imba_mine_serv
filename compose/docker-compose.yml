@@ -1,6 +1,8 @@
 services:
   minecraft:
     container_name: forge-server
+    mem_limit: 31g
+    cpus: 4
     build:
       context: ..
       dockerfile: docker/Dockerfile
@@ -28,6 +30,8 @@ services:
       ALLOW_FLIGHT: "${ALLOW_FLIGHT}"
       PVP: "${PVP}"
       ENABLE_COMMAND_BLOCK: "${ENABLE_COMMAND_BLOCK}"
+      # Автовыдача опки при старте контейнера
+      OPS: "${OPS}"
 
     volumes:
       - ../data/world:/data/world

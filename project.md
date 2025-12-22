@@ -69,7 +69,7 @@
    * server mods
    * client mods
    * configs
-4. Одна `docker-compose.yml` без лишних сервисов.
+4. Одна `docker-compose.yml` с минимумом сервисов (minecraft + bot).
 
 ---
 
@@ -78,7 +78,7 @@
 Пока только как концепция, без файлов:
 
 * `docker/` — всё, что связано с образом сервера
-* `compose/` — docker-compose
+* `docker-compose.yml` — основной compose-файл
 * `mods/` — моды и их списки
 * `config/` — конфиги
 * `env/` — разные env-файлы (пример / локал / прод)

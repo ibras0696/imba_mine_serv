@@ -12,15 +12,30 @@
 
 | Путь               | Назначение                                                                |
 |--------------------|---------------------------------------------------------------------------|
-| `compose/`         | `docker-compose.yml` и связанные файлы                                   |
+| `docker-compose.yml` | основной compose-файл проекта                                          |
 | `docker/`          | Dockerfile + артефакты Forge installer (`docker/artifacts`)               |
 | `mods/server/`     | `.jar` серверных модов (то, что монтируется в контейнер)                  |
 | `mods/client/`     | полезные клиентские моды/оптимизации                                      |
 | `mods/sources/`    | JSON/TXT‑списки для автоматической загрузки модов                         |
 | `git/scripts/`     | Все утилиты: загрузка модов, Forge installer, установка клиентских модов |
+| `bot/`             | Telegram‑бот для админ‑управления сервером                               |
 | `env/`             | `.env.example` + твои локальные/прод конфиги                              |
 | `docs/`            | Подробная документация (`modpack.md`, `player-guide.md`, `deploy-linux.md`) |
 | `data/`, `logs/`   | Мир/конфиги/логи сервера (монтируются как volume)                         |
+
+## Документация (дерево)
+
+docs/
+├─ [project-overview.md](docs/project-overview.md) — обзор проекта и текущего состояния  
+├─ [system-architecture.md](docs/system-architecture.md) — системная схема и взаимодействия  
+├─ [deploy-linux.md](docs/deploy-linux.md) — деплой на Linux/VPS  
+├─ [player-guide.md](docs/player-guide.md) — инструкция для игроков  
+├─ [modpack.md](docs/modpack.md) — таблицы модов и зависимости  
+├─ [download-links.md](docs/download-links.md) — прямые ссылки на .jar  
+├─ [bot-spec.md](docs/bot-spec.md) — спецификация Telegram-бота  
+└─ [dev-log.md](docs/dev-log.md) — журнал разработки  
+
+[PLAN.md](PLAN.md) — дорожная карта и принятые решения  
 
 ## Быстрый старт (локально/на сервере)
 
@@ -31,6 +46,9 @@ cd imba_mine_serv
 cp env/.env.example env/local.env     # или env/production.env на VPS
 ${EDITOR:-nano} env/local.env         # правим порт, EULA, OPS, память и т.д.
 
+cp env/.env.bot.example .env.bot      # настройка Telegram-бота
+${EDITOR:-nano} .env.bot              # BOT_TOKEN, TELEGRAM_ADMINS, пути/SSH
+
 make forge-installer                  # скачиваем оффлайн Forge installer в docker/artifacts
 make fetch-mods                       # тянем все моды из Modrinth (+ CurseForge если есть API-ключ)
 
@@ -39,6 +57,16 @@ make logs                             # следим за логами
 ```
 
 После каждого изменения `.env` или состава модов делай `make down && make up`.
+
+## Telegram-бот
+
+Бот стартует вместе с сервером через `docker compose up`/`make up`. Минимум нужно:
+
+1. Скопировать `env/.env.bot.example` в `.env.bot`.
+2. Заполнить `BOT_TOKEN` и `TELEGRAM_ADMINS`.
+3. При необходимости скорректировать `WORKDIR`, `ENV_FILE`, `COMPOSE_FILE`.
+
+Если бот не нужен, можно временно закомментировать сервис `bot` в `docker-compose.yml`.
 
 ## Настройка `.env`
 

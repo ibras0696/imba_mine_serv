@@ -98,13 +98,6 @@
 
 ## **11. Ad Astra (Forge)**
 
-
-## **12. Superb Warfare**
-
-* **???:** Server + Client
-* **???????:** ??????? ???????, ??????????, ?????????
-* **???????????:** Curios API, GeckoLib
-
 * **Тип:** Server + Client
 * **Функция:** космос, ракеты, планеты
 * **Зависимости:**
@@ -112,6 +105,15 @@
   * ✔ Architectury API
   * ✔ Botarium
   * ✔ Resourceful Lib
+
+## **12. Superb Warfare**
+
+* **Тип:** Server + Client
+* **Функция:** военная техника, артиллерия, оружие
+* **Зависимости:**
+
+  * ✔ Curios API
+  * ✔ GeckoLib
 
 ## **13. Architectury API**
 

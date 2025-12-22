@@ -6,6 +6,8 @@ Thumbs.db
 # Локальные env-файлы (оставляем только шаблон)
 env/*.env
 !env/.env.example
+env/.env.bot
+.env.bot
 
 # Моды и ресурсы, которые нельзя коммитить
 mods/server/*.jar

@@ -5,14 +5,17 @@
 ## 1. Общая схема
 
 ```
-├── Docker Compose (compose/docker-compose.yml)
-│     └── forge-server (itzg/minecraft-server + кастомный Dockerfile)
-│           ├─ /data/world        (bind: ./data/world)
-│           ├─ /data/config       (bind: ./config)
-│           ├─ /data/mods         (bind: ./mods/server)
-│           ├─ /data/logs         (bind: ./logs)
-│           ├─ /data/artifacts    (bind: ./docker/artifacts)
-│           └─ RCON порт 25575
+├── Docker Compose (docker-compose.yml)
+│     ├── forge-server (itzg/minecraft-server + кастомный Dockerfile)
+│     │     ├─ /data/world        (bind: ./data/world)
+│     │     ├─ /data/config       (bind: ./config)
+│     │     ├─ /data/mods         (bind: ./mods/server)
+│     │     ├─ /data/logs         (bind: ./logs)
+│     │     ├─ /data/artifacts    (bind: ./docker/artifacts)
+│     │     └─ RCON порт 25575
+│     └── forge-bot (Python + aiogram)
+│           ├─ /app               (bind: ./)
+│           └─ /var/run/docker.sock
 ├── Makefile CLI
 │     ├─ up / down / restart / logs / ps
 │     ├─ forge-installer, fetch-mods
@@ -29,7 +32,8 @@
 
 ## 2. Docker Compose
 
-- Единственный сервис `minecraft` собирается из `docker/Dockerfile` и запускает Forge 1.20.1 (Java 17).  
+- Сервисы `minecraft` и `bot` собираются из `docker/Dockerfile` и `bot/Dockerfile`.  
+- `minecraft` запускает Forge 1.20.1 (Java 17), `bot` управляет сервером через `make` и `docker compose`.  
 - Переменные окружения читаются из `.env` (по умолчанию `env/local.env`, на проде `env/production.env`).  
 - После удаления переменной `OPS` из compose-файла контейнер больше не пытается самостоятельно управлять операторами (это было причиной падений в offline-режиме).  
 - Все данные мира, логов, конфигов, модов находятся на хосте (каталоги `data/`, `logs/`, `config/`, `mods/server/`, `docker/artifacts/`).

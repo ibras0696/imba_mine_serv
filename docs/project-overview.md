@@ -4,21 +4,22 @@
 
 ## 1. Что реализовано сейчас
 
-- **Контейнерная сборка** на базе `itzg/minecraft-server` с пользовательским Dockerfile и compose-файлом (`compose/docker-compose.yml`). Любой админ запускает всё одной командой `make up`.
+- **Контейнерная сборка** на базе `itzg/minecraft-server` с пользовательским Dockerfile и compose-файлом (`docker-compose.yml`). Любой админ запускает всё одной командой `make up`.
 - **Единый `.env`** (`env/.env.example`, `env/local.env`, `env/production.env`) управляет портом, EULA, объёмом памяти, онлайн-режимом, списком операторов (`OPS`) и опцией `ALLOW_FLIGHT`.
 - **Разделение модов**: `mods/server` (входит в контейнер) и `mods/client` (для игроков), плюс `mods/sources` с JSON/TXT для автозагрузок, и отдельная рабочая папка `ts_mods` под свежие .jar от пользователя (в `.gitignore`).
 - **Автоматическая загрузка Forge и модов** через `git/scripts/fetch_modrinth.py`, `git/scripts/fetch_curseforge.py`, `git/scripts/download_forge.sh`, `git/scripts/download_mods.sh` (можно вызывать из Makefile).
 - **Makefile-CLI** для старта/остановки, логов, чистки, обновления модов и выдачи опки (`make op PLAYER=Ник`).
 - **Новый мир** создан на VPS (резервная копия `data/world_backup_*` лежит рядом), разрешены полёты (`allow-flight=true`) и выданы права `ibras0696`, `ibrass`.
 - **Автозапуск**: на сервере создан юнит `/etc/systemd/system/imba-mine.service`, который вызывает `make up ENV_FILE=env/production.env` при старте системы (`systemctl enable --now imba-mine.service`).
-- **Документация**: README, player-guide, deploy-guide, модпак-лист и данный обзор. Для Telegram-бота подготовлено отдельное ТЗ (`docs/bot-spec.md`).  
+- **Документация**: README, player-guide, deploy-guide, модпак-лист и данный обзор. Спецификация Telegram-бота — в `docs/bot-spec.md`.  
 
 ## 2. Структура репозитория
 
 | Путь | Назначение |
 |------|------------|
-| `compose/docker-compose.yml` | Compose c единственным сервисом `minecraft`, пробросом портов и volume-ами мира/логов/модов. |
+| `docker-compose.yml` | Compose с сервисами `minecraft` и `bot`, пробросом портов и volume-ами мира/логов/модов. |
 | `docker/` | Dockerfile + `artifacts/` для Forge-инсталлятора. |
+| `bot/` | Telegram-бот для админ-управления сервером. |
 | `env/` | Образцы и рабочие `.env`. В гит попадает только `.env.example`. |
 | `mods/server`, `mods/client` | `.jar` сервера и списки/архивы для клиента. |
 | `mods/sources/` | JSON/TXT со ссылками на Modrinth/CurseForge (чтобы знать откуда брали файлы). |

@@ -50,6 +50,16 @@ cd imba_mine_serv
 
 ---
 
+## 3.1. Настройка Telegram-бота (если нужен)
+
+1. Скопируй шаблон: `cp env/.env.bot.example .env.bot`.
+2. Заполни минимум:
+   - `BOT_TOKEN` — токен бота.
+   - `TELEGRAM_ADMINS` — список Telegram ID через запятую.
+3. При необходимости поправь пути `WORKDIR`, `ENV_FILE`, `COMPOSE_FILE`.
+
+---
+
 ## 4. Проброс порта
 
 1. Разрешаем порт в UFW:

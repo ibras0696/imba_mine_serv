@@ -1,4 +1,4 @@
-# 📦 Modpack Guide (Forge 1.20.1)
+# 📦 Гайд по модпаку (Forge 1.20.1)
 
 Документ для админа и игроков: что ставить, куда кидать `.jar`, какие зависимости помнить. Всё построено на списке из `mods.md`, но оформлено таблицами «для чайников».
 
@@ -20,6 +20,7 @@
 | 2 | Dungeons Plus | Server + Client | Компактные RPG‑структуры | — |
 | 3 | YUNG's Better Series (Dungeons/Mineshafts/Strongholds/Nether Fortresses) | Server + Client | Улучшенная генерация ключевых структур | Требует YUNG’s API |
 | 4 | YUNG’s API | Server + Client | Библиотека для модов YUNG’s | — |
+| 5 | DivineRPG | Server + Client | Глобальный RPG‑мод: измерения, мобы, боссы, оружие/броня | — |
 
 ---
 
@@ -41,7 +42,7 @@
 | 9 | Flywheel | Server + Client | Рендер/эффекты для Create | — |
 |10 | Immersive Engineering | Server + Client | Проводка, генераторы, производство | — |
 |11 | Ad Astra (Forge) | Server + Client | Космос, ракеты, новые планеты | Architectury API, Botarium, Resourceful Lib |
-|12 | Superb Warfare | Server + Client | Military vehicles, artillery, firearms | Curios API, GeckoLib |
+|12 | Superb Warfare | Server + Client | Военная техника, артиллерия, оружие | Curios API, GeckoLib |
 |13 | Architectury API | Server + Client | Библиотека для мультиплатформенных модов | — |
 |14 | Botarium | Server + Client | Хранение ресурсов/энергии | — |
 |15 | Resourceful Lib | Server + Client | Библиотека для Ad Astra и др. | — |

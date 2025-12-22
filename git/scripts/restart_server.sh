@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 ENV_FILE="${1:-$REPO_ROOT/env/production.env}"
-COMPOSE_FILE="$REPO_ROOT/compose/docker-compose.yml"
+COMPOSE_FILE="$REPO_ROOT/docker-compose.yml"
 
 cd "$REPO_ROOT"
 

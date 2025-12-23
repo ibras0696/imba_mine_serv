@@ -78,29 +78,29 @@ async def _execute(
     )
 
 
-def _make_prefix(config: Config) -> str:
+def _compose_prefix(config: Config) -> str:
     env_rel = _relative_to_workdir(config.env_file, config.workdir)
     compose_rel = _relative_to_workdir(config.compose_file, config.workdir)
-    return f'ENV_FILE="{env_rel}" COMPOSE_FILE="{compose_rel}"'
+    return f'docker compose --env-file "{env_rel}" -f "{compose_rel}"'
 
 
 async def make_up(config: Config) -> CommandResult:
-    cmd = f'{_make_prefix(config)} make up'
+    cmd = f'{_compose_prefix(config)} up -d minecraft'
     return await _execute(config, cmd, "Сервер запускается:")
 
 
 async def make_down(config: Config) -> CommandResult:
-    cmd = f'{_make_prefix(config)} make down'
+    cmd = f'{_compose_prefix(config)} stop minecraft'
     return await _execute(config, cmd, "Сервер останавливается:")
 
 
 async def make_restart(config: Config) -> CommandResult:
-    cmd = f'{_make_prefix(config)} make restart'
+    cmd = f'{_compose_prefix(config)} restart minecraft'
     return await _execute(config, cmd, "Команда перезапуска отправлена:")
 
 
 async def make_ps(config: Config) -> CommandResult:
-    cmd = f'{_make_prefix(config)} make ps'
+    cmd = f'{_compose_prefix(config)} ps'
     return await _execute(config, cmd, "Текущее состояние контейнеров:")
 
 
@@ -108,7 +108,6 @@ async def docker_logs(config: Config, lines: int) -> CommandResult:
     if lines <= 0:
         lines = 100
     cmd = (
-        f'docker compose --env-file "{config.env_file}" '
-        f'-f "{config.compose_file}" logs --tail {lines}'
+        f'{_compose_prefix(config)} logs --tail {lines}'
     )
     return await _execute(config, cmd, f"Последние {lines} строк логов:")

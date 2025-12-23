@@ -1,2 +1,3 @@
 # Ручной список ссылок (например, для модов только с CurseForge).
 # Формат: https://example.com/mod.jar OptionalName.jar
+https://cdn.modrinth.com/data/F3kLpGw6/versions/iPO1zRlr/DivineRPG-1.10.7.5.jar DivineRPG-1.10.7.5.jar

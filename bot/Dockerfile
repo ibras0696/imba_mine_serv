@@ -1,19 +1,13 @@
-FROM python:3.11-slim
+FROM docker:27.3.1-cli
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
+RUN apk add --no-cache python3 py3-pip
+
 WORKDIR /app
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        bash \
-        make \
-        docker.io \
-        docker-compose-plugin \
-    && rm -rf /var/lib/apt/lists/*
-
 COPY bot/requirements.txt /app/bot/requirements.txt
-RUN pip install --no-cache-dir -r /app/bot/requirements.txt
+RUN python3 -m pip install --no-cache-dir -r /app/bot/requirements.txt
 
-CMD ["python", "-m", "bot.main"]
+CMD ["python3", "-m", "bot.main"]

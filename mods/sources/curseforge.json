@@ -1,7 +1,1 @@
-[
-  {
-    "name": "FTB Ultimine",
-    "slug": "ftb-ultimine",
-    "notes": "Forge-only. Not on Modrinth so we fetch via CurseForge API."
-  }
-]
+[]

@@ -14,11 +14,12 @@ COMPOSE_FILE := docker-compose.yml
 ENV_FILE ?= env/local.env
 DOCKER_COMPOSE := docker compose
 PYTHON ?= py
+AUTO_FETCH_MODS ?= 0
 PLINK ?= tools/plink.exe
 SSH_HOST ?= root@83.147.246.160
 SSH_PASSWORD ?=
 
-.PHONY: help up down restart logs ps clean rebuild fetch-mods forge-installer op op-ibrass remote-op remote-op-ibrass kick kick-ibrass players remote-players
+.PHONY: help up down restart logs ps clean clean-local rebuild fetch-mods fetch-mods-server forge-installer op op-ibrass remote-op remote-op-ibrass kick kick-ibrass players remote-players
 
 help:
 	@echo "Доступные команды:"
@@ -28,17 +29,22 @@ help:
 	@echo "  make logs       - посмотреть логи в реальном времени"
 	@echo "  make ps         - статус контейнера"
 	@echo "  make clean      - удалить контейнер и связанные тома (осторожно)"
+	@echo "  make clean-local - удалить локальные кеши (pyc/__pycache__ и т.п.)"
 	@echo "  make rebuild    - пересобрать образ (после правок Dockerfile)"
 	@echo "  make forge-installer - скачать Forge installer в docker/artifacts"
 	@echo "  make op PLAYER=Ник - выдать опку через rcon-cli"
 	@echo "  make kick PLAYER=Ник - кикнуть игрока через rcon-cli"
 	@echo "  make players    - список игроков через rcon-cli list"
 	@echo "  make remote-op PLAYER=Ник SSH_PASSWORD=... - выдать опку по SSH (plink)"
+	@echo "  make fetch-mods-server - скачать только серверные моды"
 
 up:
 	@if [ ! -f "$(ENV_FILE)" ]; then \
 		echo "WARNING: файл $(ENV_FILE) не найден. Скопируй env/.env.example -> $(ENV_FILE) и заполни."; \
 		exit 1; \
+	fi
+	@if [ "$(AUTO_FETCH_MODS)" = "1" ]; then \
+		$(MAKE) fetch-mods-server; \
 	fi
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d
 	@if docker ps --format '{{.Names}}' | grep -q '^forge-server$$'; then \
@@ -63,6 +69,11 @@ clean:
 	@read -p "Точно продолжить? (yes/NO) " ans && [ "$$ans" = "yes" ]
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) down -v
 
+clean-local:
+	@echo "Очистка локальных кешей Python..."
+	@find . -path "./.venv" -prune -o -path "./data" -prune -o -path "./logs" -prune -o -name "__pycache__" -type d -exec rm -rf {} +
+	@find . -path "./.venv" -prune -o -name "*.pyc" -o -name "*.pyo" -o -name ".pytest_cache" -o -name ".mypy_cache" -o -name ".ruff_cache" -o -name ".coverage" -o -name ".coverage.*" -exec rm -rf {} +
+
 rebuild:
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) build --no-cache
 
@@ -78,6 +89,20 @@ fetch-mods:
 		else \
 			echo "INFO: CURSEFORGE_API_KEY не задан, пропускаю CurseForge."; \
 		fi
+
+fetch-mods-server:
+	@if [ ! -f "$(ENV_FILE)" ]; then \
+		echo "WARNING: файл $(ENV_FILE) не найден. Скопируй env/.env.example -> $(ENV_FILE) и заполни."; \
+		exit 1; \
+	fi
+	@set -a; . $(ENV_FILE); set +a; \
+		$(PYTHON) git/scripts/fetch_modrinth.py server; \
+		if [ -n "$$CURSEFORGE_API_KEY" ]; then \
+			$(PYTHON) git/scripts/fetch_curseforge.py; \
+		else \
+			echo "INFO: CURSEFORGE_API_KEY не задан, пропускаю CurseForge."; \
+		fi; \
+		bash git/scripts/download_mods.sh server
 
 forge-installer:
 	@if [ ! -f "$(ENV_FILE)" ]; then \

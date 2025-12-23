@@ -8,6 +8,8 @@
 - Git + Make (в составе Git for Windows уже есть `bash` и `make`).
 - Python 3.10+ (нужен для скриптов Modrinth/CurseForge; на Windows используем `py`).
 
+> На Windows команды `make ...` запускать из Git Bash, а не из PowerShell.
+
 ## Структура
 
 | Путь               | Назначение                                                                |
@@ -43,6 +45,8 @@ docs/
 git clone https://github.com/ibras0696/imba_mine_serv.git
 cd imba_mine_serv
 
+# Убедись, что Docker Desktop запущен (на Windows).
+
 cp env/.env.example env/local.env     # или env/production.env на VPS
 ${EDITOR:-nano} env/local.env         # правим порт, EULA, OPS, память и т.д.
 
@@ -68,6 +72,17 @@ make logs                             # следим за логами
 
 Если бот не нужен, можно временно закомментировать сервис `bot` в `docker-compose.yml`.
 
+## Авто-скачивание серверных модов
+
+Если нужно, чтобы серверные моды подтягивались автоматически при `make up`, включи:
+
+```
+AUTO_FETCH_MODS=1
+```
+
+в `env/local.env` или `env/production.env`.  
+Тогда при старте будет выполняться `make fetch-mods-server` (Modrinth + CurseForge + `server-mods.txt`).
+
 ## Настройка `.env`
 
 1. **Шаблон** — `env/.env.example`. Его не редактируем.
@@ -87,7 +102,7 @@ make logs                             # следим за логами
 1. **Modrinth** — списки `mods/sources/modrinth-server.json` и `modrinth-client.json`.
    - `make fetch-mods` → `git/scripts/fetch_modrinth.py` подтянет последние релизы Forge 1.20.1.
    - Все загрузки логируются в `mods/sources/download_log.csv`.
-2. **CurseForge** — если моды есть только там (пример: FTB Ultimine).
+2. **CurseForge** — если моды есть только там.
    - Получи `CURSEFORGE_API_KEY` на https://console.curseforge.com/.
    - Добавь значение в `.env`, запусти `make fetch-mods`; тег из `mods/sources/curseforge.json` будет скачан автоматически.
 3. **Ручные ссылки** — заполняем `mods/sources/server-mods.txt` или `client-mods.txt`, затем:

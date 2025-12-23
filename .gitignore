@@ -36,3 +36,25 @@ compose/*.override.yml
 tools/
 
 ts_mods/
+
+# Python/cache artifacts
+__pycache__/
+*.py[cod]
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+
+# Virtual envs
+.venv/
+venv/
+
+# IDE/editor junk
+.idea/
+*.iml
+.vscode/
+
+# Misc local scratch files
+bad_jars.txt

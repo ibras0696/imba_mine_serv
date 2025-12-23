@@ -97,15 +97,21 @@
 
 * **Тип:** Server + Client
 * **Функция:** МЕ сеть, автокрафт, хранение
+* **Зависимости:** GuideME
+
+## 12. GuideME
+
+* **Тип:** Server + Client
+* **Функция:** библиотека/гайды для AE2
 * **Зависимости:** нет
 
-## 12. Industrial Upgrade
+## 13. Industrial Upgrade
 
 * **Тип:** Server + Client
 * **Функция:** индустриальные механизмы и апгрейды
 * **Зависимости:** нет
 
-## 13. Ad Astra (Forge)
+## 14. Ad Astra (Forge)
 
 * **Тип:** Server + Client
 * **Функция:** космос, ракеты, планеты
@@ -115,7 +121,7 @@
   * Botarium
   * Resourceful Lib
 
-## 14. Superb Warfare
+## 15. Superb Warfare
 
 * **Тип:** Server + Client
 * **Функция:** военная техника, артиллерия, оружие
@@ -124,31 +130,31 @@
   * Curios API
   * GeckoLib
 
-## 15. Architectury API
+## 16. Architectury API
 
 * **Тип:** Server + Client
 * **Функция:** библиотека для мультиплатформенных модов
 * **Зависимости:** нет
 
-## 16. Botarium
+## 17. Botarium
 
 * **Тип:** Server + Client
 * **Функция:** хранение ресурсов/энергии
 * **Зависимости:** нет
 
-## 17. Resourceful Lib
+## 18. Resourceful Lib
 
 * **Тип:** Server + Client
 * **Функция:** библиотека для Ad Astra и др.
 * **Зависимости:** нет
 
-## 18. Resourceful Config
+## 19. Resourceful Config
 
 * **Тип:** Server + Client
 * **Функция:** библиотека конфигов для модов Resourceful
 * **Зависимости:** нет
 
-## 19. Advanced Mining Dimension
+## 20. Advanced Mining Dimension
 
 * **Тип:** Server + Client
 * **Функция:** отдельное шахтерское измерение
@@ -158,7 +164,7 @@
 
 # 4. Генерация мира
 
-## 20. Terralith
+## 21. Terralith
 
 * **Тип:** Server + Client
 * **Функция:** дополнительные биомы
@@ -168,48 +174,48 @@
 
 # 5. Утилиты / Геймплей
 
-## 21. Sophisticated Backpacks
+## 22. Sophisticated Backpacks
 
 * **Тип:** Server + Client
 * **Функция:** продвинутые рюкзаки
 * **Зависимости:** нет
 
-## 22. Sophisticated Storage
+## 23. Sophisticated Storage
 
 * **Тип:** Server + Client
 * **Функция:** хранилища и сундуки с сортировкой
 * **Зависимости:** Sophisticated Core
 
-## 23. Sophisticated Core
+## 24. Sophisticated Core
 
 * **Тип:** Server + Client
 * **Функция:** библиотека для Sophisticated Storage/Backpacks
 * **Зависимости:** нет
 
-## 24. Curios API
+## 25. Curios API
 
 * **Тип:** Server + Client
 * **Функция:** доп. слоты для аксессуаров
 * **Зависимости:** нет
 
-## 25. Cloth Config API
+## 26. Cloth Config API
 
 * **Тип:** Server + Client (некоторые моды требуют)
 * **Функция:** настройка модов
 * **Зависимости:** нет
 
-## 26. Balm
+## 27. Balm
 
 * **Тип:** Server + Client (если требуется модом)
 * **Функция:** техническая библиотека
 
-## 27. FallingTree
+## 28. FallingTree
 
 * **Тип:** Server + Client
 * **Функция:** удобная вырубка деревьев
 * **Зависимости:** нет
 
-## 28. Ore Excavation
+## 29. Ore Excavation
 
 * **Тип:** Server + Client
 * **Функция:** вейнмайнинг руд
@@ -223,43 +229,49 @@
 
 ---
 
-## 29. Inventory Profiles Next
+## 30. Inventory Profiles Next
 
 * **Тип:** Client-only
 * **Описание:** сортировка/перенос предметов
-* **Зависимости:** LibIPN
+* **Зависимости:** LibIPN, Kotlin For Forge
 
-## 30. LibIPN
+## 31. LibIPN
 
 * **Тип:** Client-only
 * **Описание:** библиотека для Inventory Profiles Next
+* **Зависимости:** Kotlin For Forge
+
+## 32. Kotlin For Forge
+
+* **Тип:** Client-only
+* **Описание:** Kotlin рантайм для модов
 * **Зависимости:** нет
 
-## 31. AppleSkin
+## 33. AppleSkin
 
 * **Тип:** Client-only
 * **Описание:** показатели голода/сытости
 * **Зависимости:** нет
 
-## 32. JEI (Just Enough Items)
+## 34. JEI (Just Enough Items)
 
 * **Тип:** Client-only
 * **Описание:** показ рецептов
 * **Зависимости:** нет
 
-## 33. Jade / Hwyla
+## 35. Jade / Hwyla
 
 * **Тип:** Client-only
 * **Описание:** информация о блоке при наведении
 * **Зависимости:** нет
 
-## 34. Embeddium
+## 36. Embeddium
 
 * **Тип:** Client-only
 * **Описание:** оптимизация FPS (Forge версия Sodium)
 * **Зависимости:** нет
 
-## 35. Oculus
+## 37. Oculus
 
 * **Тип:** Client-only
 * **Описание:** шейдеры
@@ -267,24 +279,24 @@
 
   * требует Embeddium
 
-## 36. FerriteCore
+## 38. FerriteCore
 
 * **Тип:** Client-only (можно на сервер, но лучше нет)
 * **Описание:** экономия RAM
 
-## 37. JourneyMap
+## 39. JourneyMap
 
 * **Тип:** Client-only
 * **Описание:** карта мира
 * **Зависимости:** нет
 
-## 38. Любые Shader Packs
+## 40. Любые Shader Packs
 
 * **Тип:** Client-only
 * **Описание:** графика
 * **Зависимости:** нет
 
-## 39. Любые GUI/Интерфейсные моды
+## 41. Любые GUI/Интерфейсные моды
 
 * **Тип:** Client-only
 * **Описание:** улучшение интерфейса
@@ -305,6 +317,7 @@
 * GeckoLib
 * Immersive Engineering
 * Applied Energistics 2
+* GuideME
 * Industrial Upgrade
 * Ad Astra
 * Superb Warfare
@@ -329,6 +342,7 @@
 
 * Inventory Profiles Next
 * LibIPN
+* Kotlin For Forge
 * AppleSkin
 * JEI
 * Jade

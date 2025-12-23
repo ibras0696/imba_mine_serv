@@ -44,15 +44,16 @@
 | # | Мод | Тип | Назначение | Зависимости |
 |---|-----|-----|------------|-------------|
 | 10 | Immersive Engineering | Server + Client | проводка, генераторы, производство | нет |
-| 11 | Applied Energistics 2 | Server + Client | ME-сеть, автокрафт, хранение | нет |
-| 12 | Industrial Upgrade | Server + Client | индустриальные механизмы и апгрейды | нет |
-| 13 | Ad Astra (Forge) | Server + Client | космос, ракеты, планеты | Architectury API, Botarium, Resourceful Lib |
-| 14 | Superb Warfare | Server + Client | техника, артиллерия, оружие | Curios API, GeckoLib |
-| 15 | Architectury API | Server + Client | библиотека для мультиплатформенных модов | нет |
-| 16 | Botarium | Server + Client | хранение ресурсов/энергии | нет |
-| 17 | Resourceful Lib | Server + Client | библиотека для Ad Astra и др. | нет |
-| 18 | Resourceful Config | Server + Client | библиотека конфигов Resourceful | нет |
-| 19 | Advanced Mining Dimension | Server + Client | отдельное шахтерское измерение | нет |
+| 11 | Applied Energistics 2 | Server + Client | ME-сеть, автокрафт, хранение | GuideME |
+| 12 | GuideME | Server + Client | библиотека/гайды для AE2 | нет |
+| 13 | Industrial Upgrade | Server + Client | индустриальные механизмы и апгрейды | нет |
+| 14 | Ad Astra (Forge) | Server + Client | космос, ракеты, планеты | Architectury API, Botarium, Resourceful Lib |
+| 15 | Superb Warfare | Server + Client | техника, артиллерия, оружие | Curios API, GeckoLib |
+| 16 | Architectury API | Server + Client | библиотека для мультиплатформенных модов | нет |
+| 17 | Botarium | Server + Client | хранение ресурсов/энергии | нет |
+| 18 | Resourceful Lib | Server + Client | библиотека для Ad Astra и др. | нет |
+| 19 | Resourceful Config | Server + Client | библиотека конфигов Resourceful | нет |
+| 20 | Advanced Mining Dimension | Server + Client | отдельное шахтерское измерение | нет |
 
 ---
 
@@ -60,7 +61,7 @@
 
 | # | Мод | Тип | Назначение | Зависимости |
 |---|-----|-----|------------|-------------|
-| 20 | Terralith | Server + Client | дополнительные биомы | нет |
+| 21 | Terralith | Server + Client | дополнительные биомы | нет |
 
 ---
 
@@ -68,14 +69,14 @@
 
 | # | Мод | Тип | Назначение | Зависимости |
 |---|-----|-----|------------|-------------|
-| 21 | Sophisticated Backpacks | Server + Client | продвинутые рюкзаки | нет |
-| 22 | Sophisticated Storage | Server + Client | сундуки/хранилища с сортировкой | Sophisticated Core |
-| 23 | Sophisticated Core | Server + Client | библиотека для Sophisticated Storage/Backpacks | нет |
-| 24 | Curios API | Server + Client | доп. слоты для аксессуаров | нет |
-| 25 | Cloth Config API | Server + Client | настройки модов | нет |
-| 26 | Balm | Server + Client (если нужен модом) | техническая библиотека | нет |
-| 27 | FallingTree | Server + Client | удобная вырубка деревьев | нет |
-| 28 | Ore Excavation | Server + Client | вейнмайнинг руд | нет |
+| 22 | Sophisticated Backpacks | Server + Client | продвинутые рюкзаки | нет |
+| 23 | Sophisticated Storage | Server + Client | сундуки/хранилища с сортировкой | Sophisticated Core |
+| 24 | Sophisticated Core | Server + Client | библиотека для Sophisticated Storage/Backpacks | нет |
+| 25 | Curios API | Server + Client | доп. слоты для аксессуаров | нет |
+| 26 | Cloth Config API | Server + Client | настройки модов | нет |
+| 27 | Balm | Server + Client (если нужен модом) | техническая библиотека | нет |
+| 28 | FallingTree | Server + Client | удобная вырубка деревьев | нет |
+| 29 | Ore Excavation | Server + Client | вейнмайнинг руд | нет |
 
 ---
 
@@ -83,17 +84,18 @@
 
 | # | Мод | Тип | Назначение | Зависимости |
 |---|-----|-----|------------|-------------|
-| 29 | Inventory Profiles Next | Client-only | сортировка/перенос предметов | LibIPN |
-| 30 | LibIPN | Client-only | библиотека для Inventory Profiles Next | нет |
-| 31 | AppleSkin | Client-only | индикаторы голода/сытости | нет |
-| 32 | JEI (Just Enough Items) | Client-only | просмотр рецептов | нет |
-| 33 | Jade / Hwyla | Client-only | инфо о блоке при наведении | нет |
-| 34 | Embeddium | Client-only | оптимизация FPS (Forge аналог Sodium) | нет |
-| 35 | Oculus | Client-only | шейдеры | Embeddium |
-| 36 | FerriteCore | Client-only (можно на сервер, но лучше нет) | экономия RAM | нет |
-| 37 | JourneyMap | Client-only | карта мира | нет |
-| 38 | Shader Packs | Client-only | графические улучшения | через Oculus |
-| 39 | GUI-моды | Client-only | улучшение интерфейса | нет |
+| 30 | Inventory Profiles Next | Client-only | сортировка/перенос предметов | LibIPN, Kotlin For Forge |
+| 31 | LibIPN | Client-only | библиотека для Inventory Profiles Next | Kotlin For Forge |
+| 32 | Kotlin For Forge | Client-only | Kotlin рантайм для модов | нет |
+| 33 | AppleSkin | Client-only | индикаторы голода/сытости | нет |
+| 34 | JEI (Just Enough Items) | Client-only | просмотр рецептов | нет |
+| 35 | Jade / Hwyla | Client-only | инфо о блоке при наведении | нет |
+| 36 | Embeddium | Client-only | оптимизация FPS (Forge аналог Sodium) | нет |
+| 37 | Oculus | Client-only | шейдеры | Embeddium |
+| 38 | FerriteCore | Client-only (можно на сервер, но лучше нет) | экономия RAM | нет |
+| 39 | JourneyMap | Client-only | карта мира | нет |
+| 40 | Shader Packs | Client-only | графические улучшения | через Oculus |
+| 41 | GUI-моды | Client-only | улучшение интерфейса | нет |
 
 ---
 
@@ -101,11 +103,11 @@
 
 ### Обязательны на сервере и клиенте
 
-When Dungeons Arise, Dungeons Plus, Structure Gel API, YUNG's Better Series, YUNG's API, Ars Nouveau, Patchouli, GeckoLib, Immersive Engineering, Applied Energistics 2, Industrial Upgrade, Ad Astra, Superb Warfare, Architectury API, Botarium, Resourceful Lib, Resourceful Config, Advanced Mining Dimension, Terralith, Sophisticated Backpacks, Sophisticated Storage, Sophisticated Core, Curios API, Cloth Config API, Balm, FallingTree, Ore Excavation.
+When Dungeons Arise, Dungeons Plus, Structure Gel API, YUNG's Better Series, YUNG's API, Ars Nouveau, Patchouli, GeckoLib, Immersive Engineering, Applied Energistics 2, GuideME, Industrial Upgrade, Ad Astra, Superb Warfare, Architectury API, Botarium, Resourceful Lib, Resourceful Config, Advanced Mining Dimension, Terralith, Sophisticated Backpacks, Sophisticated Storage, Sophisticated Core, Curios API, Cloth Config API, Balm, FallingTree, Ore Excavation.
 
 ### Только на клиенте
 
-Inventory Profiles Next, LibIPN, AppleSkin, JEI, Jade, Embeddium, Oculus, FerriteCore, JourneyMap, Shader Packs, GUI-моды.
+Inventory Profiles Next, LibIPN, Kotlin For Forge, AppleSkin, JEI, Jade, Embeddium, Oculus, FerriteCore, JourneyMap, Shader Packs, GUI-моды.
 
 ### Опционально
 

@@ -3,7 +3,7 @@ FROM docker:27.3.1-cli
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-RUN apk add --no-cache python3 py3-pip
+RUN apk add --no-cache bash make python3 py3-pip
 
 WORKDIR /app
 

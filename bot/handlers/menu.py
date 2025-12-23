@@ -21,6 +21,7 @@ def register(router: Router, config: Config) -> None:
             "/status, /ps - состояние контейнеров",
             "/up, /down, /restart - управление сервером",
             "/logs [50|100|200] - просмотр логов",
+            "/env, /env_get, /env_set - просмотр и правка env",
             "/start - открыть главное меню",
         ]
         await message.answer("\n".join(lines), reply_markup=main_menu_keyboard())

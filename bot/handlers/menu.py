@@ -10,18 +10,19 @@ def register(router: Router, config: Config) -> None:
     @router.message(CommandStart())
     async def cmd_start(message: Message) -> None:
         await message.answer(
-            "Привет! Бот управляет сервером Imba Mine. Выбирай команду ниже.",
+            "Привет! Бот управляет сервером Imba Mine. Выбирай действие кнопками ниже.",
             reply_markup=main_menu_keyboard(),
         )
 
     @router.message(Command("help"))
     async def cmd_help(message: Message) -> None:
         lines = [
-            "Доступные команды:",
-            "/status, /ps - состояние контейнеров",
-            "/up, /down, /restart - управление сервером",
-            "/logs [50|100|200] - просмотр логов",
-            "/env, /env_get, /env_set - просмотр и правка env",
-            "/start - открыть главное меню",
+            "Доступно через кнопки ниже:",
+            "Запуск — поднять сервер",
+            "Остановка — остановить сервер",
+            "Перезапуск — перезапустить сервер",
+            "Статус — состояние контейнеров",
+            "Логи — последние 50/100/200 строк логов",
+            "Конфиг — просмотр и правка env",
         ]
         await message.answer("\n".join(lines), reply_markup=main_menu_keyboard())

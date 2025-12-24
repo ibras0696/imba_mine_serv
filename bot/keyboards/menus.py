@@ -3,7 +3,8 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 MAIN_BUTTONS = [
     [("Запуск", "menu:up"), ("Остановка", "menu:down")],
     [("Перезапуск", "menu:restart"), ("Статус", "menu:status")],
-    [("Логи", "menu:logs"), ("Конфиг", "menu:env")],
+    [("Логи", "menu:logs"), ("Моды", "menu:mods")],
+    [("Конфиг", "menu:env")],
     [("OP ibrass", "op:grant:ibrass"), ("Снять ibrass", "op:revoke:ibrass")],
 ]
 

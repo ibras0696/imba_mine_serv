@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher, F, Router
 from aiogram.enums import ParseMode
 
 from bot.config import Config, load_config
-from bot.handlers import control, env, menu, ops, status
+from bot.handlers import control, env, menu, mods, ops, status
 
 
 def _create_router(config: Config) -> Router:
@@ -19,6 +19,7 @@ def _create_router(config: Config) -> Router:
     control.register(router, config)
     ops.register(router, config)
     env.register(router, config)
+    mods.register(router, config)
     return router
 
 

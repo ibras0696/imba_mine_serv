@@ -23,6 +23,7 @@ def register(router: Router, config: Config) -> None:
             "Перезапуск — перезапустить сервер",
             "Статус — состояние контейнеров",
             "Логи — последние 50/100/200 строк логов",
+            "Моды — список нужных модов с ссылками",
             "Конфиг — просмотр и правка env",
         ]
         await message.answer("\n".join(lines), reply_markup=main_menu_keyboard())

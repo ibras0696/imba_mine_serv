@@ -31,14 +31,32 @@ async def build_status_text(config: Config) -> str:
     if not stdout:
         return "Состояние контейнеров:\n<pre>(контейнеры не найдены)</pre>"
 
-    try:
-        data = json.loads(stdout)
-    except json.JSONDecodeError:
+    def parse_compose_ps(raw: str) -> list[dict]:
+        try:
+            parsed = json.loads(raw)
+            if isinstance(parsed, dict):
+                return [parsed]
+            if isinstance(parsed, list):
+                return [item for item in parsed if isinstance(item, dict)]
+        except json.JSONDecodeError:
+            items: list[dict] = []
+            for line in raw.splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    item = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+                if isinstance(item, dict):
+                    items.append(item)
+            return items
+        return []
+
+    data = parse_compose_ps(stdout)
+    if not data:
         output = stdout or "(нет вывода)"
         return f"Состояние контейнеров:\n<pre>{html.escape(output)}</pre>"
-
-    if not data:
-        return "Состояние контейнеров:\n<pre>(контейнеры не найдены)</pre>"
 
     def format_ports(publishers: list[dict] | None) -> str:
         if not publishers:

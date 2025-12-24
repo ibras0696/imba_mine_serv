@@ -112,19 +112,37 @@ def _format_publishers(publishers: list[dict] | None) -> str:
     return ", ".join(parts)
 
 
-def _format_compose_ps(stdout: str) -> str:
+def _parse_compose_ps(stdout: str) -> list[dict]:
     if not stdout:
-        return "<pre>(контейнеры не найдены)</pre>"
+        return []
     try:
         data = json.loads(stdout)
+        if isinstance(data, dict):
+            return [data]
+        if isinstance(data, list):
+            return [item for item in data if isinstance(item, dict)]
+        return []
     except json.JSONDecodeError:
-        return f"<pre>{html.escape(stdout)}</pre>"
+        items: list[dict] = []
+        for line in stdout.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                item = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            if isinstance(item, dict):
+                items.append(item)
+        return items
+
+
+def _format_compose_ps(stdout: str) -> str:
+    data = _parse_compose_ps(stdout)
     if not data:
         return "<pre>(контейнеры не найдены)</pre>"
     lines: list[str] = []
     for item in data:
-        if not isinstance(item, dict):
-            continue
         service = item.get("Service") or item.get("Name") or "unknown"
         state = item.get("State") or "unknown"
         status = item.get("Status") or ""

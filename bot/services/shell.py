@@ -22,6 +22,6 @@ async def run(
         stderr=asyncio.subprocess.PIPE,
     )
     stdout_bytes, stderr_bytes = await process.communicate()
-    stdout = stdout_bytes.decode().strip()
-    stderr = stderr_bytes.decode().strip()
+    stdout = stdout_bytes.decode(errors="replace").strip()
+    stderr = stderr_bytes.decode(errors="replace").strip()
     return process.returncode, stdout, stderr

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -24,6 +25,15 @@ def _relative_to_workdir(path: Path, workdir: Path) -> str:
 
 
 def _format_output(stdout: str, stderr: str) -> str:
+    def trim(text: str, limit: int) -> str:
+        if not text or len(text) <= limit:
+            return text
+        omitted = len(text) - limit
+        return f"...(обрезано {omitted} символов)\n{text[-limit:]}"
+
+    stdout = trim(stdout, 3200)
+    stderr = trim(stderr, 1200)
+
     blocks: list[str] = []
     if stdout:
         blocks.append(f"<pre>{html.escape(stdout)}</pre>")
@@ -84,6 +94,52 @@ def _compose_prefix(config: Config) -> str:
     return f'docker compose --env-file "{env_rel}" -f "{compose_rel}"'
 
 
+def _format_publishers(publishers: list[dict] | None) -> str:
+    if not publishers:
+        return ""
+    parts: list[str] = []
+    for publisher in publishers:
+        if not isinstance(publisher, dict):
+            continue
+        target = publisher.get("TargetPort")
+        published = publisher.get("PublishedPort")
+        proto = publisher.get("Protocol")
+        host = publisher.get("URL") or "0.0.0.0"
+        if published and target:
+            parts.append(f"{host}:{published}->{target}/{proto}")
+        elif target:
+            parts.append(f"{target}/{proto}")
+    return ", ".join(parts)
+
+
+def _format_compose_ps(stdout: str) -> str:
+    if not stdout:
+        return "<pre>(контейнеры не найдены)</pre>"
+    try:
+        data = json.loads(stdout)
+    except json.JSONDecodeError:
+        return f"<pre>{html.escape(stdout)}</pre>"
+    if not data:
+        return "<pre>(контейнеры не найдены)</pre>"
+    lines: list[str] = []
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        service = item.get("Service") or item.get("Name") or "unknown"
+        state = item.get("State") or "unknown"
+        status = item.get("Status") or ""
+        ports = _format_publishers(item.get("Publishers"))
+        line = f"{service}: {state}"
+        if status:
+            line += f" — {status}"
+        if ports:
+            line += f" — порты: {ports}"
+        lines.append(line)
+    if not lines:
+        return "<pre>(контейнеры не найдены)</pre>"
+    return f"<pre>{html.escape('\\n'.join(lines))}</pre>"
+
+
 async def make_up(config: Config) -> CommandResult:
     cmd = f'{_compose_prefix(config)} up -d minecraft'
     return await _execute(config, cmd, "Сервер запускается:")
@@ -100,14 +156,36 @@ async def make_restart(config: Config) -> CommandResult:
 
 
 async def make_ps(config: Config) -> CommandResult:
-    cmd = f'{_compose_prefix(config)} ps'
-    return await _execute(config, cmd, "Текущее состояние контейнеров:")
+    if config.remote:
+        return CommandResult(
+            ok=False,
+            text="BOT_REMOTE=1 пока не поддерживается для этой операции.",
+        )
+    cmd = f'{_compose_prefix(config)} ps --format json'
+    code, stdout, stderr = await run(cmd, workdir=config.workdir, dry_run=config.dry_run)
+    if config.dry_run:
+        return CommandResult(
+            ok=True,
+            text=f"BOT_DRY_RUN=1 - команда не запускалась.\n<code>{html.escape(cmd)}</code>",
+            stdout=stdout,
+            stderr=stderr,
+        )
+    if code != 0:
+        fallback_cmd = f'{_compose_prefix(config)} ps'
+        return await _execute(config, fallback_cmd, "Текущее состояние контейнеров:")
+    formatted = _format_compose_ps(stdout)
+    return CommandResult(
+        ok=True,
+        text=f"Текущее состояние контейнеров:\n{formatted}",
+        stdout=stdout,
+        stderr=stderr,
+    )
 
 
 async def docker_logs(config: Config, lines: int) -> CommandResult:
     if lines <= 0:
         lines = 100
     cmd = (
-        f'{_compose_prefix(config)} logs --tail {lines}'
+        f'{_compose_prefix(config)} logs --no-color --tail {lines} minecraft'
     )
-    return await _execute(config, cmd, f"Последние {lines} строк логов:")
+    return await _execute(config, cmd, f"Последние {lines} строк логов сервера:")

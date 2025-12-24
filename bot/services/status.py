@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import json
 
 from bot.config import Config
 from bot.services.shell import run
@@ -12,7 +13,7 @@ async def build_status_text(config: Config) -> str:
 
     cmd = (
         f'docker compose --env-file "{config.env_file}" '
-        f'-f "{config.compose_file}" ps'
+        f'-f "{config.compose_file}" ps --format json'
     )
     code, stdout, stderr = await run(cmd, workdir=config.workdir, dry_run=config.dry_run)
 
@@ -27,5 +28,49 @@ async def build_status_text(config: Config) -> str:
             f"<pre>{html.escape(error_text)}</pre>"
         )
 
-    output = stdout or "(нет вывода)"
+    if not stdout:
+        return "Состояние контейнеров:\n<pre>(контейнеры не найдены)</pre>"
+
+    try:
+        data = json.loads(stdout)
+    except json.JSONDecodeError:
+        output = stdout or "(нет вывода)"
+        return f"Состояние контейнеров:\n<pre>{html.escape(output)}</pre>"
+
+    if not data:
+        return "Состояние контейнеров:\n<pre>(контейнеры не найдены)</pre>"
+
+    def format_ports(publishers: list[dict] | None) -> str:
+        if not publishers:
+            return ""
+        parts: list[str] = []
+        for publisher in publishers:
+            if not isinstance(publisher, dict):
+                continue
+            target = publisher.get("TargetPort")
+            published = publisher.get("PublishedPort")
+            proto = publisher.get("Protocol")
+            host = publisher.get("URL") or "0.0.0.0"
+            if published and target:
+                parts.append(f"{host}:{published}->{target}/{proto}")
+            elif target:
+                parts.append(f"{target}/{proto}")
+        return ", ".join(parts)
+
+    lines: list[str] = []
+    for item in data:
+        if not isinstance(item, dict):
+            continue
+        service = item.get("Service") or item.get("Name") or "unknown"
+        state = item.get("State") or "unknown"
+        status = item.get("Status") or ""
+        ports = format_ports(item.get("Publishers"))
+        line = f"{service}: {state}"
+        if status:
+            line += f" — {status}"
+        if ports:
+            line += f" — порты: {ports}"
+        lines.append(line)
+
+    output = "\n".join(lines) if lines else "(контейнеры не найдены)"
     return f"Состояние контейнеров:\n<pre>{html.escape(output)}</pre>"

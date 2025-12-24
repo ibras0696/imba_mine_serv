@@ -88,7 +88,7 @@
 | 31 | LibIPN | Client-only | библиотека для Inventory Profiles Next | Kotlin For Forge |
 | 32 | Kotlin For Forge | Client-only | Kotlin рантайм для модов | нет |
 | 33 | AppleSkin | Client-only | индикаторы голода/сытости | нет |
-| 34 | JEI (Just Enough Items) | Client-only | просмотр рецептов | нет |
+| 34 | JEI (Just Enough Items) | Client-only (опционально на сервер для автокрафта) | просмотр рецептов | нет |
 | 35 | Jade / Hwyla | Client-only | инфо о блоке при наведении | нет |
 | 36 | Embeddium | Client-only | оптимизация FPS (Forge аналог Sodium) | нет |
 | 37 | Oculus | Client-only | шейдеры | Embeddium |

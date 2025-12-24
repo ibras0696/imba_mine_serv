@@ -122,5 +122,9 @@
   {
     "name": "Balm",
     "slug": "balm"
+  },
+  {
+    "name": "JEI",
+    "slug": "jei"
   }
 ]

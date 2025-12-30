@@ -126,5 +126,13 @@
   {
     "name": "JEI",
     "slug": "jei"
+  },
+  {
+    "name": "Essentials Commands",
+    "slug": "essentials-commands"
+  },
+  {
+    "name": "Fox API Remaster",
+    "slug": "fox-api-remaster"
   }
 ]

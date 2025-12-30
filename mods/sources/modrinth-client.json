@@ -38,5 +38,13 @@
   {
     "name": "JourneyMap",
     "slug": "journeymap"
+  },
+  {
+    "name": "Essentials Commands",
+    "slug": "essentials-commands"
+  },
+  {
+    "name": "Fox API Remaster",
+    "slug": "fox-api-remaster"
   }
 ]

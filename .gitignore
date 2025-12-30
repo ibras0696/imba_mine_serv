@@ -1,43 +1,45 @@
-# Общие временные файлы
+﻿# OS / filesystem junk
 .DS_Store
 Thumbs.db
 *.log
 
-# Локальные env-файлы (оставляем только шаблон)
+# Local env files (keep example only)
 env/*.env
 !env/.env.example
 env/.env.bot
 .env.bot
 
-# Моды и ресурсы, которые нельзя коммитить
+# Mods and archives
 mods/server/*.jar
 mods/server/*.zip
 mods/client/*.jar
 mods/client/*.zip
 
-# Данные сервера и логи (генерируются автоматически)
-data/
-logs/
+# Server data and logs
+/data/
+/logs/
 
-# Локально скачанные установщики/артефакты
-docker/artifacts/
+# Forge artifacts
+/docker/artifacts/
 
-# Бэкапы/архивы
+# Backups / archives
 backup/
+backups/
 *.tar
 *.tar.gz
 *.zip
 
-# Docker артефакты, если появятся
-docker-data/
+# Docker leftovers
+/docker-data/
 compose/*.override.yml
 
-# локальные утилиты (plink, вспомогательные бинарники)
-tools/
+# Local tools (plink, etc.)
+/tools/
 
-ts_mods/
+# Local client mods
+/ts_mods/
 
-# Python/cache artifacts
+# Python cache
 __pycache__/
 *.py[cod]
 *.pyd
@@ -51,10 +53,10 @@ __pycache__/
 .venv/
 venv/
 
-# IDE/editor junk
+# IDE/editor
 .idea/
 *.iml
 .vscode/
 
-# Misc local scratch files
+# Misc local scratch
 bad_jars.txt

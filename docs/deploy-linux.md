@@ -1,121 +1,115 @@
-# Гайд: деплой Minecraft Forge сервера на Linux (VPS)
+﻿# Деплой на Linux/VPS
 
-> Этот документ рассчитан на чайника. Следуем шагам сверху вниз. Никаких Windows — только Linux (Ubuntu/Debian/RHEL и т.п.).
+## 1. Установка зависимостей
 
----
+- Docker + Docker Compose
+- Git
+- Make (опционально, но удобно)
 
-## 1. Подготовка сервера
-
-1. Берём чистый VPS/Dedicated с публичным IPv4.
-2. Заходим по SSH: `ssh user@your.ip`.
-3. Обновляем систему:
-   ```bash
-   sudo apt update && sudo apt upgrade -y    # для Debian/Ubuntu
-   ```
-4. Ставим Docker + Docker Compose:
-   ```bash
-   curl -fsSL https://get.docker.com | sh
-   sudo usermod -aG docker $USER  # чтобы не писать sudo каждый раз
-   ```
-   > После этого перелогинься (или `newgrp docker`), чтобы права применились.
-
----
-
-## 2. Клонирование репозитория
+## 2. Клонирование
 
 ```bash
 git clone https://github.com/ibras0696/imba_mine_serv.git
 cd imba_mine_serv
 ```
 
-> Если Git не установлен: `sudo apt install git -y`.
-
----
-
-## 3. Настройка `.env`
-
-1. Создаём рабочий файл: `cp env/.env.example env/production.env`.
-2. Правим значения в `env/production.env`:
-   - `SERVER_PORT=25565`
-   - `EULA=TRUE`
-   - `SERVER_NAME=My Forge Server`
-   - `MEMORY_MIN/MAX` под ресурсы VPS (обычно 2G/4G минимум).
-3. Для Makefile скажем использовать прод-файл: `export ENV_FILE=env/production.env` или укажем при вызове (`make up ENV_FILE=env/production.env`).
-4. Скачиваем оффлайн Forge installer и моды:
-   ```bash
-   make forge-installer ENV_FILE=env/production.env
-   make fetch-mods ENV_FILE=env/production.env
-   ```
-   Теперь контейнер не будет тянуть Forge/моды из интернета при первом старте.
-
----
-
-## 3.1. Настройка Telegram-бота (если нужен)
-
-1. Скопируй шаблон: `cp env/.env.bot.example .env.bot`.
-2. Заполни минимум:
-   - `BOT_TOKEN` — токен бота.
-   - `TELEGRAM_ADMINS` — список Telegram ID через запятую.
-3. При необходимости поправь пути `WORKDIR`, `ENV_FILE`, `COMPOSE_FILE`.
-
----
-
-## 4. Проброс порта
-
-1. Разрешаем порт в UFW:
-   ```bash
-   sudo ufw allow 25565/tcp
-   sudo ufw reload
-   ```
-2. Если UFW не установлен, ставим: `sudo apt install ufw -y`.
-3. Для firewalld (CentOS/RHEL):
-   ```bash
-   sudo firewall-cmd --add-port=25565/tcp --permanent
-   sudo firewall-cmd --reload
-   ```
-4. Проверяем внешние security groups (AWS, GCP, Hetzner и т.д.) — порт должен быть разрешён.
-
----
-
-## 5. Старт сервера
+## 3. Конфигурация env
 
 ```bash
-make up ENV_FILE=env/production.env
+cp env/.env.example env/production.env
+nano env/production.env
 ```
 
-Полезные команды:
-- `make logs ENV_FILE=env/production.env` — логи сервера.
-- `make ps ENV_FILE=env/production.env` — статус контейнера.
-- `make down ENV_FILE=env/production.env` — остановить.
-- `make clean ENV_FILE=env/production.env` — снести вместе с томами (осторожно, удалит мир).
+Проверь:
+- `EULA=TRUE`
+- `ONLINE_MODE=FALSE` (если нужен оффлайн режим)
+- порты `SERVER_PORT` и `SHOOTER_SERVER_PORT`
+- память `MEMORY_MIN/MAX` и `SHOOTER_MEMORY_MIN/MAX`
 
----
+## 4. Telegram-бот
 
-## 6. Проверка доступности
+```bash
+cp env/.env.bot.example .env.bot
+nano .env.bot
+```
 
-1. С другого устройства запускаем Minecraft Forge 1.20.1, добавляем сервер `your.ip:25565`.
-2. Если не заходит — проверяем:
-   - `make logs` на ошибки модов/EULA.
-   - `sudo ufw status` / `firewall-cmd --list-ports`.
-   - `curl https://canyouseeme.org` → тестируем порт.
+Заполни:
+- `BOT_TOKEN`
+- `TELEGRAM_ADMINS`
+- `WORKDIR` (путь к репозиторию)
 
----
+## 5. Скачивание модов и Forge
 
-## 7. Обновления и бэкапы
+```bash
+make forge-installer
+make fetch-mods
+```
 
-1. Прежде чем обновлять моды/Forge:
-   - `make down`
-   - делаем бэкап папки `data/world` и `config`.
-2. Заливаем новые `.jar` в `mods/server`, обновляем `docs/modpack.md`.
-3. `make up` — сервер поднимется с новыми модами.
+## 6. Запуск
 
----
+```bash
+make up           # основной сервер + бот
+make up-all       # оба сервера + бот
+```
 
-## 8. Автоматизация (опционально)
+## 7. Systemd (автостарт)
 
-- Можно написать скрипты для загрузки модов через `curl`/`wget` и складывать их в `mods/server`.
-- Придумать cron-задачи для регулярного `make backup` (как только реализуем).
+### Основной сервер + бот
 
----
+`/etc/systemd/system/new-sborka-hard.service`:
 
-Готово! При необходимости можно дополнить документ инструкциями для провайдера, где будет разворачиваться сервер (Hetzner, AWS, OVH и т.п.).
+```ini
+[Unit]
+Description=New Sborka Hard (main + bot)
+After=docker.service
+Requires=docker.service
+
+[Service]
+WorkingDirectory=/root/new_sborka_hard
+ExecStart=/usr/bin/make ENV_FILE=env/production.env up
+ExecStop=/usr/bin/make ENV_FILE=env/production.env down
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Второй сервер (shooter)
+
+`/etc/systemd/system/new-sborka-hard-shooter.service`:
+
+```ini
+[Unit]
+Description=New Sborka Hard (shooter)
+After=docker.service
+Requires=docker.service
+
+[Service]
+WorkingDirectory=/root/new_sborka_hard
+ExecStart=/usr/bin/make ENV_FILE=env/production.env up-one SERVER=shooter
+ExecStop=/usr/bin/make ENV_FILE=env/production.env stop SERVER=shooter
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+### Очистка предметов
+
+Используй сервисы из `deploy/systemd/`:
+- `new-sborka-hard-cleanup.service`
+- `new-sborka-hard-cleanup-shooter.service`
+
+Активировать:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now new-sborka-hard.service
+sudo systemctl enable --now new-sborka-hard-cleanup.service
+```
+
+## 8. Firewall
+
+Открой TCP порты:
+- 25565 (main)
+- 25566 (shooter)

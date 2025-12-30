@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 set -u
 
 SERVICE_NAME="${SERVICE_NAME:-forge-server}"
@@ -31,9 +31,9 @@ while true; do
   sleep_and_warn 30 "Очистка предметов через 30 секунд."
   sleep 25
   for i in 5 4 3 2 1; do
-    say "Очистка через $i..." || true
+    say "Очистка предметов через $i..." || true
     sleep 1
   done
   cleanup_items || true
-  say "Очистка завершена." || true
+  say "Очистка предметов завершена." || true
 done

@@ -1,18 +1,16 @@
-services:
+﻿services:
   minecraft:
     container_name: forge-server
-    mem_limit: 31g
-    cpus: 4
+    mem_limit: "${MEMORY_MAX:-31g}"
+    cpus: "${SERVER_CPUS:-4}"
     build:
       context: .
       dockerfile: docker/Dockerfile
       args:
-        MC_VERSION: "1.20.1"
+        MC_VERSION: "${MC_VERSION:-1.20.1}"
     restart: unless-stopped
-
     ports:
       - "${SERVER_PORT:-25565}:25565"
-
     environment:
       EULA: "${EULA}"
       TYPE: "FORGE"
@@ -30,14 +28,47 @@ services:
       ALLOW_FLIGHT: "${ALLOW_FLIGHT}"
       PVP: "${PVP}"
       ENABLE_COMMAND_BLOCK: "${ENABLE_COMMAND_BLOCK}"
-      # Автовыдача опки при старте контейнера
       OPS: "${OPS}"
-
     volumes:
-      - ./data/world:/data/world
+      - ./data/main:/data
       - ./config:/data/config
       - ./mods/server:/data/mods
-      - ./logs:/data/logs
+      - ./docker/artifacts:/data/artifacts
+
+  minecraft_shooter:
+    container_name: forge-server-shooter
+    mem_limit: "${SHOOTER_MEMORY_MAX:-16g}"
+    cpus: "${SHOOTER_CPUS:-4}"
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MC_VERSION: "${SHOOTER_MC_VERSION:-1.20.1}"
+    restart: unless-stopped
+    ports:
+      - "${SHOOTER_SERVER_PORT:-25566}:25565"
+    environment:
+      EULA: "${SHOOTER_EULA}"
+      TYPE: "FORGE"
+      VERSION: "${SHOOTER_MC_VERSION:-1.20.1}"
+      FORGE_INSTALLER: "${SHOOTER_FORGE_INSTALLER}"
+      INIT_MEMORY: "${SHOOTER_MEMORY_MIN}"
+      MAX_MEMORY: "${SHOOTER_MEMORY_MAX}"
+      SERVER_NAME: "${SHOOTER_SERVER_NAME}"
+      DIFFICULTY: "${SHOOTER_DIFFICULTY}"
+      MAX_PLAYERS: "${SHOOTER_MAX_PLAYERS}"
+      ONLINE_MODE: "${SHOOTER_ONLINE_MODE}"
+      LEVEL_NAME: "${SHOOTER_LEVEL_NAME}"
+      VIEW_DISTANCE: "${SHOOTER_VIEW_DISTANCE}"
+      ALLOW_NETHER: "${SHOOTER_ALLOW_NETHER}"
+      ALLOW_FLIGHT: "${SHOOTER_ALLOW_FLIGHT}"
+      PVP: "${SHOOTER_PVP}"
+      ENABLE_COMMAND_BLOCK: "${SHOOTER_ENABLE_COMMAND_BLOCK}"
+      OPS: "${SHOOTER_OPS}"
+    volumes:
+      - ./data/shooter:/data
+      - ./config:/data/config
+      - ./mods/server:/data/mods
       - ./docker/artifacts:/data/artifacts
 
   bot:
@@ -46,8 +77,6 @@ services:
       context: .
       dockerfile: bot/Dockerfile
     restart: unless-stopped
-    depends_on:
-      - minecraft
     environment:
       BOT_ENV_FILE: /app/.env.bot
       PYTHONUNBUFFERED: "1"

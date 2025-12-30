@@ -1,5 +1,5 @@
-#!/usr/bin/env bash
-# Скачивает оф. Forge installer через curl/wget.
+﻿#!/usr/bin/env bash
+# Скачивает Forge installer через curl/wget.
 # Использование:
 #   ./git/scripts/download_forge.sh [MC_VERSION] [FORGE_BUILD]
 # Пример: ./git/scripts/download_forge.sh 1.20.1 47.2.0
@@ -24,21 +24,20 @@ if command -v curl >/dev/null 2>&1; then
 elif command -v wget >/dev/null 2>&1; then
   DL_CMD="wget"
 else
-  echo "❌ Установите curl или wget для работы скрипта."
+  echo "Не найден curl или wget. Установи один из них."
   exit 1
 fi
 
 if [[ -f "$DEST_FILE" ]]; then
-  echo "⏭  Forge уже скачан: $DEST_FILE"
+  echo "Forge уже скачан: $DEST_FILE"
   exit 0
 fi
 
-echo "⬇️  Скачиваю Forge ${FORGE_ID}"
+echo "Скачиваю Forge ${FORGE_ID}"
 if [[ "$DL_CMD" == "curl" ]]; then
   curl -fSL "$URL" -o "$DEST_FILE"
 else
   wget -q -O "$DEST_FILE" "$URL"
 fi
 
-echo "✅ Готово: $DEST_FILE"
-echo "Помести этот installer рядом с Dockerfile, если решишь собирать собственный образ без itzg/minecraft-server."
+echo "Готово: $DEST_FILE"

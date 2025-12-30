@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import html
 import json
@@ -44,7 +44,7 @@ def build_mods_text(config: Config) -> str:
     client_only_entries = [entry for entry in client_list if entry.get("slug") not in server_slugs]
 
     lines: list[str] = ["<b>Моды для игры</b>"]
-    lines.append(f"Нужны на сервере и у клиента ({len(server_list)}):")
+    lines.append(f"Серверные (нужны и на сервере, и у игрока) ({len(server_list)}):")
     lines.extend(_format_list(server_list))
     lines.append("")
     lines.append(f"Только клиент (не ставить на сервер) ({len(client_only_entries)}):")

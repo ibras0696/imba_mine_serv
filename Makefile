@@ -1,15 +1,8 @@
+﻿# ===========================================
+# Makefile для управления сервером Minecraft
 # ===========================================
-# Makefile — дружелюбная обёртка для Docker
-# ===========================================
-# Как пользоваться:
-# 1. Скопируй env/.env.example → env/local.env и заполни.
-# 2. Запусти `make up`, чтобы поднять сервер.
-# 3. Остальные команды помогают управлять контейнером.
-
-# Жёстко используем bash, чтобы make в PowerShell не спотыкался
 SHELL := bash
 
-# Пути и команды (менять не нужно, если не знаешь зачем)
 COMPOSE_FILE := docker-compose.yml
 ENV_FILE ?= env/local.env
 DOCKER_COMPOSE := docker compose
@@ -19,24 +12,47 @@ PLINK ?= tools/plink.exe
 SSH_HOST ?= root@83.147.246.160
 SSH_PASSWORD ?=
 
-.PHONY: help up down restart logs ps clean clean-local rebuild fetch-mods fetch-mods-server forge-installer op op-ibrass remote-op remote-op-ibrass kick kick-ibrass players remote-players
+MAIN_SERVICE := minecraft
+SHOOTER_SERVICE := minecraft_shooter
+BOT_SERVICE := bot
+
+MAIN_CONTAINER := forge-server
+SHOOTER_CONTAINER := forge-server-shooter
+
+SERVER ?= main
+ifeq ($(SERVER),shooter)
+SERVICE := $(SHOOTER_SERVICE)
+CONTAINER := $(SHOOTER_CONTAINER)
+else
+SERVICE := $(MAIN_SERVICE)
+CONTAINER := $(MAIN_CONTAINER)
+endif
+
+.PHONY: help up up-all up-one up-shooter down stop stop-all restart restart-all logs ps clean clean-local clean-data rebuild fetch-mods fetch-mods-server forge-installer op op-ibrass remote-op remote-op-ibrass kick kick-ibrass players remote-players
 
 help:
 	@echo "Доступные команды:"
-	@echo "  make up         - поднять сервер (docker compose up -d)"
-	@echo "  make down       - остановить сервер"
-	@echo "  make restart    - перезапустить (down + up)"
-	@echo "  make logs       - посмотреть логи в реальном времени"
-	@echo "  make ps         - статус контейнера"
-	@echo "  make clean      - удалить контейнер и связанные тома (осторожно)"
-	@echo "  make clean-local - удалить локальные кеши (pyc/__pycache__ и т.п.)"
-	@echo "  make rebuild    - пересобрать образ (после правок Dockerfile)"
-	@echo "  make forge-installer - скачать Forge installer в docker/artifacts"
-	@echo "  make op PLAYER=Ник - выдать опку через rcon-cli"
-	@echo "  make kick PLAYER=Ник - кикнуть игрока через rcon-cli"
-	@echo "  make players    - список игроков через rcon-cli list"
-	@echo "  make remote-op PLAYER=Ник SSH_PASSWORD=... - выдать опку по SSH (plink)"
-	@echo "  make fetch-mods-server - скачать только серверные моды"
+	@echo "  make up                - поднять основной сервер + бот"
+	@echo "  make up-all            - поднять оба сервера + бот"
+	@echo "  make up-one SERVER=... - поднять только один сервер (main|shooter)"
+	@echo "  make up-shooter        - поднять shooter-сервер"
+	@echo "  make down              - остановить и удалить все контейнеры"
+	@echo "  make stop SERVER=...   - остановить один сервер (main|shooter)"
+	@echo "  make stop-all          - остановить все сервисы"
+	@echo "  make restart           - перезапустить выбранный сервер (SERVER=main|shooter)"
+	@echo "  make restart-all       - перезапустить оба сервера + бот"
+	@echo "  make logs SERVER=...   - показать логи сервера (main|shooter)"
+	@echo "  make ps                - статус контейнеров"
+	@echo "  make clean             - docker compose down -v (без удаления данных)"
+	@echo "  make clean-data        - удалить data/main, data/shooter и backups (ОПАСНО)"
+	@echo "  make clean-local       - удалить локальные Python-кэши"
+	@echo "  make rebuild           - пересобрать образы без кеша"
+	@echo "  make forge-installer   - скачать Forge installer в docker/artifacts"
+	@echo "  make fetch-mods        - скачать моды (server+client)"
+	@echo "  make fetch-mods-server - скачать моды только для сервера"
+	@echo "  make op PLAYER=Nick    - выдать OP на выбранном сервере"
+	@echo "  make kick PLAYER=Nick  - кикнуть игрока на выбранном сервере"
+	@echo "  make players           - список игроков на выбранном сервере"
 
 up:
 	@if [ ! -f "$(ENV_FILE)" ]; then \
@@ -46,31 +62,66 @@ up:
 	@if [ "$(AUTO_FETCH_MODS)" = "1" ]; then \
 		$(MAKE) fetch-mods-server; \
 	fi
-	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d
-	@if docker ps --format '{{.Names}}' | grep -q '^forge-server$$'; then \
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d $(MAIN_SERVICE) $(BOT_SERVICE)
+	@if docker ps --format '{{.Names}}' | grep -q '^$(MAIN_CONTAINER)$$'; then \
 		bash git/scripts/grant_ops.sh "$(ENV_FILE)" "make-up"; \
 	else \
-		echo "forge-server не запущен, пропускаю grant_ops"; \
+		echo "$(MAIN_CONTAINER) не найден, пропускаю grant_ops"; \
 	fi
+
+up-all:
+	@if [ ! -f "$(ENV_FILE)" ]; then \
+		echo "WARNING: файл $(ENV_FILE) не найден. Скопируй env/.env.example -> $(ENV_FILE) и заполни."; \
+		exit 1; \
+	fi
+	@if [ "$(AUTO_FETCH_MODS)" = "1" ]; then \
+		$(MAKE) fetch-mods-server; \
+	fi
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d $(MAIN_SERVICE) $(SHOOTER_SERVICE) $(BOT_SERVICE)
+
+up-one:
+	@if [ ! -f "$(ENV_FILE)" ]; then \
+		echo "WARNING: файл $(ENV_FILE) не найден. Скопируй env/.env.example -> $(ENV_FILE) и заполни."; \
+		exit 1; \
+	fi
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d $(SERVICE)
+
+up-shooter:
+	$(MAKE) up-one SERVER=shooter
 
 down:
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) down
 
-restart: down up
+stop:
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) stop $(SERVICE)
+
+stop-all:
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) stop
+
+restart:
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) restart $(SERVICE)
+
+restart-all:
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) restart
 
 logs:
-	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) logs -f
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) logs -f $(SERVICE)
 
 ps:
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) ps
 
 clean:
-	@echo "⚠️  Эта команда удалит контейнеры и тома (мир/конфиги)."
-	@read -p "Точно продолжить? (yes/NO) " ans && [ "$$ans" = "yes" ]
+	@echo "Остановит контейнеры и удалит анонимные volumes. Данные на bind-mount не трогаются."
+	@read -p "Продолжить? (yes/NO) " ans && [ "$$ans" = "yes" ]
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) down -v
 
+clean-data:
+	@echo "Удалит data/main, data/shooter и backups. Это необратимо."
+	@read -p "Точно удалить? (yes/NO) " ans && [ "$$ans" = "yes" ]
+	@rm -rf ./data/main ./data/shooter ./backups
+
 clean-local:
-	@echo "Очистка локальных кешей Python..."
+	@echo "Чищу локальные Python-кэши..."
 	@find . -path "./.venv" -prune -o -path "./data" -prune -o -path "./logs" -prune -o -name "__pycache__" -type d -exec rm -rf {} +
 	@find . -path "./.venv" -prune -o -name "*.pyc" -o -name "*.pyo" -o -name ".pytest_cache" -o -name ".mypy_cache" -o -name ".ruff_cache" -o -name ".coverage" -o -name ".coverage.*" -exec rm -rf {} +
 
@@ -110,53 +161,49 @@ forge-installer:
 		exit 1; \
 	fi
 	@set -a; . $(ENV_FILE); set +a; \
-		bash git/scripts/download_forge.sh "$${MC_VERSION:-1.20.1}" "$${FORGE_VERSION:-47.4.10}"
+		bash git/scripts/download_forge.sh "$$MC_VERSION" "$$FORGE_VERSION"
 
 op:
 	@if [ -z "$(PLAYER)" ]; then \
-		echo "Использование: make op PLAYER=Ник"; \
+		echo "Использование: make op PLAYER=Nick [SERVER=main|shooter]"; \
 		exit 1; \
 	fi
-	docker exec forge-server rcon-cli op $(PLAYER)
+	docker exec $(CONTAINER) rcon-cli op $(PLAYER)
 
 op-ibrass:
 	$(MAKE) op PLAYER=ibrass
 
 remote-op:
 ifeq ($(strip $(SSH_PASSWORD)),)
-	$(error SSH_PASSWORD не задан. Запусти: make remote-op SSH_PASSWORD=... PLAYER=Ник)
+	$(error SSH_PASSWORD не задан. Используй: make remote-op SSH_PASSWORD=... PLAYER=Nick)
 endif
 	@if [ -z "$(PLAYER)" ]; then \
-		echo "Использование: make remote-op PLAYER=Ник SSH_PASSWORD=..."; \
+		echo "Использование: make remote-op SSH_PASSWORD=... PLAYER=Nick"; \
 		exit 1; \
 	fi
-	$(PLINK) -ssh $(SSH_HOST) -pw "$(SSH_PASSWORD)" "docker exec forge-server rcon-cli op $(PLAYER)"
+	$(PLINK) -ssh $(SSH_HOST) -pw "$(SSH_PASSWORD)" "docker exec $(CONTAINER) rcon-cli op $(PLAYER)"
 
-# Пример: make kick PLAYER=Notch
 kick:
 	@if [ -z "$(PLAYER)" ]; then \
-		echo "Использование: make kick PLAYER=Ник"; \
+		echo "Использование: make kick PLAYER=Nick [SERVER=main|shooter]"; \
 		exit 1; \
 	fi
-	docker exec forge-server rcon-cli kick $(PLAYER)
+	docker exec $(CONTAINER) rcon-cli kick $(PLAYER)
 
-# Быстрый вызов: make kick-ibrass
 kick-ibrass:
 	$(MAKE) kick PLAYER=ibrass
 
-# Пример: make players
 players:
-	docker exec forge-server rcon-cli list
+	docker exec $(CONTAINER) rcon-cli list
 
 remote-players:
 ifeq ($(strip $(SSH_PASSWORD)),)
-	$(error SSH_PASSWORD не задан. Запусти: make remote-players SSH_PASSWORD=...)
+	$(error SSH_PASSWORD не задан. Используй: make remote-players SSH_PASSWORD=...)
 endif
-	$(PLINK) -ssh $(SSH_HOST) -pw "$(SSH_PASSWORD)" "docker exec forge-server rcon-cli list"
-
+	$(PLINK) -ssh $(SSH_HOST) -pw "$(SSH_PASSWORD)" "docker exec $(CONTAINER) rcon-cli list"
 
 remote-op-ibrass:
 ifeq ($(strip $(SSH_PASSWORD)),)
-	$(error SSH_PASSWORD не задан. Запусти: make remote-op-ibrass SSH_PASSWORD=...)
+	$(error SSH_PASSWORD не задан. Используй: make remote-op-ibrass SSH_PASSWORD=...)
 endif
-	$(PLINK) -ssh $(SSH_HOST) -pw "$(SSH_PASSWORD)" "docker exec forge-server rcon-cli op ibrass"
+	$(PLINK) -ssh $(SSH_HOST) -pw "$(SSH_PASSWORD)" "docker exec $(CONTAINER) rcon-cli op ibrass"

@@ -1,11 +1,9 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 import shutil
-
-from bot.config import Config
 
 
 @dataclass
@@ -42,8 +40,7 @@ def _normalize_key(key: str) -> str:
     return key.strip().upper()
 
 
-def get_value(config: Config, key: str) -> str | None:
-    env_path = config.env_file
+def get_value(env_path: Path, key: str) -> str | None:
     _ensure_exists(env_path)
     target = _normalize_key(key)
     for line in _parse_lines(env_path):
@@ -58,8 +55,7 @@ def get_value(config: Config, key: str) -> str | None:
     return None
 
 
-def set_value(config: Config, key: str, value: str) -> EnvSetResult:
-    env_path = config.env_file
+def set_value(env_path: Path, key: str, value: str) -> EnvSetResult:
     _ensure_exists(env_path)
     lines = _parse_lines(env_path)
     target = _normalize_key(key)

@@ -1,0 +1,15 @@
+﻿[Unit]
+Description=New Sborka Hard item cleanup (shooter)
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/root/new_sborka_hard
+Environment=SERVICE_NAME=forge-server-shooter
+ExecStart=/root/new_sborka_hard/git/scripts/cleanup_items.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

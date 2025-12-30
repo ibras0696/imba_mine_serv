@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import asyncio
 import logging
@@ -7,7 +7,7 @@ from aiogram import Bot, Dispatcher, F, Router
 from aiogram.enums import ParseMode
 
 from bot.config import Config, load_config
-from bot.handlers import control, env, menu, mods, ops, status
+from bot.handlers import control, env, menu, mods, ops, servers, status, worlds
 
 
 def _create_router(config: Config) -> Router:
@@ -20,6 +20,8 @@ def _create_router(config: Config) -> Router:
     ops.register(router, config)
     env.register(router, config)
     mods.register(router, config)
+    servers.register(router, config)
+    worlds.register(router, config)
     return router
 
 
@@ -32,7 +34,7 @@ async def main() -> None:
     config = load_config()
 
     if not config.admin_ids:
-        raise RuntimeError("TELEGRAM_ADMINS пустой — укажи свой ID в .env.bot")
+        raise RuntimeError("TELEGRAM_ADMINS не задан (добавь ID в .env.bot)")
 
     bot = Bot(
         token=config.bot_token,

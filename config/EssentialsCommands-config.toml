@@ -12,7 +12,7 @@
 	#Time it takes to teleport after doing /spawn in seconds.
 	spawnTpTime = 5.0
 	#Time it takes to teleport after doing /home in seconds.
-	homeTpTime = 5.0
+	homeTpTime = 0.0
 	#Time it takes to teleport after doing /warp in seconds.
 	warpTpTime = 5.0
 	#This is the cooldown for /spawn.
@@ -20,7 +20,7 @@
 	#This is the cooldown for /warp
 	warpCooldown = 30.0
 	#This is the cooldown for /home.
-	homeCooldown = 30.0
+	homeCooldown = 10.0
 	#Maximum number of homes a player can have at a time.
 	maxHomes = 3
 

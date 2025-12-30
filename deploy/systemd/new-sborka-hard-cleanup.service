@@ -1,0 +1,14 @@
+[Unit]
+Description=New Sborka Hard item cleanup
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/root/new_sborka_hard
+ExecStart=/root/new_sborka_hard/git/scripts/cleanup_items.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

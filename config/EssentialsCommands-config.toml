@@ -1,0 +1,37 @@
+[Settings]
+	#This is the Discord link that will be prompted in chat by using the /discord command.
+	discordLink = "Set the Discord link in the config file!"
+	#This is the X coordinate of the Spawn block. Players will be teleported here after using /spawn.
+	spawnX = 0
+	#This is the Y coordinate of the Spawn block. Players will be teleported here after using /spawn.
+	spawnY = 80
+	#This is the Z coordinate of the Spawn block. Players will be teleported here after using /spawn.
+	spawnZ = 0
+	#Defines if /spawn is available or not.
+	spawnEnabled = false
+	#Time it takes to teleport after doing /spawn in seconds.
+	spawnTpTime = 5.0
+	#Time it takes to teleport after doing /home in seconds.
+	homeTpTime = 5.0
+	#Time it takes to teleport after doing /warp in seconds.
+	warpTpTime = 5.0
+	#This is the cooldown for /spawn.
+	spawnCooldown = 30.0
+	#This is the cooldown for /warp
+	warpCooldown = 30.0
+	#This is the cooldown for /home.
+	homeCooldown = 30.0
+	#Maximum number of homes a player can have at a time.
+	maxHomes = 3
+
+[Messages]
+	#This is the message sent to a player when they get muted. Use %duration% to include the duration in seconds of the mute.
+	muteMessage = "You have been muted for %duration%!"
+	#This is the message sent to a player when they try to use a command while it's in cooldown.
+	unmuteMessage = "You are still in cooldown!"
+	#This is the message sent to a player when they try to use /spawn while spawn is disabled.
+	spawnDisabledMessage = "Spawn is disabled!"
+	#This is the message sent to a player when they try to use /sethome while already owning maximum homes.
+	tooManyHomesMessage = "You have reached the limit on Homes."
+	#This is the message sent to a player when they try to use /home or /delhome with the incorrect home name
+	homeNotFound = "You don't have a home with that name."

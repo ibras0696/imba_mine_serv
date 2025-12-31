@@ -54,41 +54,53 @@ make up-all       # оба сервера + бот
 
 ## 7. Systemd (автостарт)
 
-### Основной сервер + бот
+### Основной + shooter + бот (рекомендуется)
 
-`/etc/systemd/system/new-sborka-hard.service`:
+Скопируй файл:
+
+```bash
+sudo cp deploy/systemd/new-sborka-hard.service /etc/systemd/system/new-sborka-hard.service
+```
+
+Содержимое `/etc/systemd/system/new-sborka-hard.service`:
 
 ```ini
 [Unit]
-Description=New Sborka Hard (main + bot)
-After=docker.service
+Description=New Sborka Hard (main + shooter + bot)
+After=network-online.target docker.service
+Wants=network-online.target
 Requires=docker.service
 
 [Service]
+Type=oneshot
+RemainAfterExit=yes
 WorkingDirectory=/root/new_sborka_hard
-ExecStart=/usr/bin/make ENV_FILE=env/production.env up
-ExecStop=/usr/bin/make ENV_FILE=env/production.env down
-Restart=on-failure
+Environment=ENV_FILE=env/production.env
+ExecStart=/usr/bin/make up-all
+ExecStop=/usr/bin/make down
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-### Второй сервер (shooter)
+### Только shooter (опционально)
 
 `/etc/systemd/system/new-sborka-hard-shooter.service`:
 
 ```ini
 [Unit]
 Description=New Sborka Hard (shooter)
-After=docker.service
+After=network-online.target docker.service
+Wants=network-online.target
 Requires=docker.service
 
 [Service]
+Type=oneshot
+RemainAfterExit=yes
 WorkingDirectory=/root/new_sborka_hard
-ExecStart=/usr/bin/make ENV_FILE=env/production.env up-one SERVER=shooter
-ExecStop=/usr/bin/make ENV_FILE=env/production.env stop SERVER=shooter
-Restart=on-failure
+Environment=ENV_FILE=env/production.env
+ExecStart=/usr/bin/make up-one SERVER=shooter
+ExecStop=/usr/bin/make stop SERVER=shooter
 
 [Install]
 WantedBy=multi-user.target
@@ -105,6 +117,7 @@ WantedBy=multi-user.target
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now new-sborka-hard.service
+sudo systemctl enable --now new-sborka-hard-shooter.service # если нужен отдельный сервис
 sudo systemctl enable --now new-sborka-hard-cleanup.service
 ```
 

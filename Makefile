@@ -1,4 +1,4 @@
-﻿# ===========================================
+# ===========================================
 # Makefile для управления сервером Minecraft
 # ===========================================
 SHELL := bash
@@ -9,7 +9,7 @@ DOCKER_COMPOSE := docker compose
 PYTHON ?= py
 AUTO_FETCH_MODS ?= 0
 PLINK ?= tools/plink.exe
-SSH_HOST ?= root@83.147.246.160
+SSH_HOST ?= root@0.0.0.0
 SSH_PASSWORD ?=
 
 MAIN_SERVICE := minecraft

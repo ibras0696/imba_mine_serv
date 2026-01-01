@@ -1,5 +1,5 @@
 [Unit]
-Description=New Sborka Hard (main + shooter + bot)
+Description=New Sborka Hard (bot only)
 After=network-online.target docker.service
 Wants=network-online.target
 Requires=docker.service
@@ -9,8 +9,8 @@ Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/root/new_sborka_hard
 Environment=ENV_FILE=env/production.env
-ExecStart=/usr/bin/make up-all
-ExecStop=/usr/bin/make down
+ExecStart=/usr/bin/make up-bot
+ExecStop=/usr/bin/make stop-bot
 
 [Install]
 WantedBy=multi-user.target

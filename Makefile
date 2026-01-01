@@ -14,15 +14,20 @@ SSH_PASSWORD ?=
 
 MAIN_SERVICE := minecraft
 SHOOTER_SERVICE := minecraft_shooter
+VANILLA_SERVICE := minecraft_vanilla
 BOT_SERVICE := bot
 
 MAIN_CONTAINER := forge-server
 SHOOTER_CONTAINER := forge-server-shooter
+VANILLA_CONTAINER := forge-server-vanilla
 
 SERVER ?= main
 ifeq ($(SERVER),shooter)
 SERVICE := $(SHOOTER_SERVICE)
 CONTAINER := $(SHOOTER_CONTAINER)
+else ifeq ($(SERVER),vanilla)
+SERVICE := $(VANILLA_SERVICE)
+CONTAINER := $(VANILLA_CONTAINER)
 else
 SERVICE := $(MAIN_SERVICE)
 CONTAINER := $(MAIN_CONTAINER)
@@ -33,18 +38,20 @@ endif
 help:
 	@echo "Доступные команды:"
 	@echo "  make up                - поднять основной сервер + бот"
-	@echo "  make up-all            - поднять оба сервера + бот"
-	@echo "  make up-one SERVER=... - поднять только один сервер (main|shooter)"
+	@echo "  make up-all            - поднять все сервера + бот"
+	@echo "  make up-one SERVER=... - поднять только один сервер (main|shooter|vanilla)"
 	@echo "  make up-shooter        - поднять shooter-сервер"
+	@echo "  make up-bot            - поднять только Telegram-бота"
 	@echo "  make down              - остановить и удалить все контейнеры"
-	@echo "  make stop SERVER=...   - остановить один сервер (main|shooter)"
+	@echo "  make stop SERVER=...   - остановить один сервер (main|shooter|vanilla)"
+	@echo "  make stop-bot          - остановить только Telegram-бота"
 	@echo "  make stop-all          - остановить все сервисы"
-	@echo "  make restart           - перезапустить выбранный сервер (SERVER=main|shooter)"
+	@echo "  make restart           - перезапустить выбранный сервер (SERVER=main|shooter|vanilla)"
 	@echo "  make restart-all       - перезапустить оба сервера + бот"
-	@echo "  make logs SERVER=...   - показать логи сервера (main|shooter)"
+	@echo "  make logs SERVER=...   - показать логи сервера (main|shooter|vanilla)"
 	@echo "  make ps                - статус контейнеров"
 	@echo "  make clean             - docker compose down -v (без удаления данных)"
-	@echo "  make clean-data        - удалить data/main, data/shooter и backups (ОПАСНО)"
+	@echo "  make clean-data        - удалить data/main, data/shooter, data/vanilla и backups (ОПАСНО)"
 	@echo "  make clean-local       - удалить локальные Python-кэши"
 	@echo "  make rebuild           - пересобрать образы без кеша"
 	@echo "  make forge-installer   - скачать Forge installer в docker/artifacts"
@@ -77,7 +84,7 @@ up-all:
 	@if [ "$(AUTO_FETCH_MODS)" = "1" ]; then \
 		$(MAKE) fetch-mods-server; \
 	fi
-	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d $(MAIN_SERVICE) $(SHOOTER_SERVICE) $(BOT_SERVICE)
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d $(MAIN_SERVICE) $(SHOOTER_SERVICE) $(VANILLA_SERVICE) $(BOT_SERVICE)
 
 up-one:
 	@if [ ! -f "$(ENV_FILE)" ]; then \
@@ -89,11 +96,21 @@ up-one:
 up-shooter:
 	$(MAKE) up-one SERVER=shooter
 
+up-bot:
+	@if [ ! -f "$(ENV_FILE)" ]; then \
+		echo "WARNING: файл $(ENV_FILE) не найден. Скопируй env/.env.example -> $(ENV_FILE) и заполни."; \
+		exit 1; \
+	fi
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) up -d $(BOT_SERVICE)
+
 down:
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) down
 
 stop:
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) stop $(SERVICE)
+
+stop-bot:
+	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) stop $(BOT_SERVICE)
 
 stop-all:
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) stop
@@ -116,9 +133,9 @@ clean:
 	$(DOCKER_COMPOSE) --env-file $(ENV_FILE) -f $(COMPOSE_FILE) down -v
 
 clean-data:
-	@echo "Удалит data/main, data/shooter и backups. Это необратимо."
+	@echo "Удалит data/main, data/shooter, data/vanilla и backups. Это необратимо."
 	@read -p "Точно удалить? (yes/NO) " ans && [ "$$ans" = "yes" ]
-	@rm -rf ./data/main ./data/shooter ./backups
+	@rm -rf ./data/main ./data/shooter ./data/vanilla ./backups
 
 clean-local:
 	@echo "Чищу локальные Python-кэши..."

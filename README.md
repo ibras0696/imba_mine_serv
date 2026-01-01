@@ -14,24 +14,26 @@
 2) `cp env/.env.bot.example .env.bot` и заполни BOT_TOKEN + TELEGRAM_ADMINS.
 3) `make forge-installer`
 4) `make fetch-mods`
-5) `make up` (основной сервер + бот) или `make up-all` (оба сервера + бот).
+5) `make up` (основной сервер + бот), `make up-all` (все сервера + бот) или `make up-bot` (только бот).
 
-## Два сервера
+## Три сервера
 
-В проекте два сервера на одной сборке:
-- **main**: порт `SERVER_PORT` (по умолчанию 25565)
-- **shooter**: порт `SHOOTER_SERVER_PORT` (по умолчанию 25566)
+В проекте три сервера:
+- **main**: Forge + моды, порт `SERVER_PORT` (по умолчанию 25565)
+- **shooter**: Forge + моды, порт `SHOOTER_SERVER_PORT` (по умолчанию 25566)
+- **vanilla**: без модов, порт `VANILLA_SERVER_PORT` (по умолчанию 25567)
 
 Данные разделены:
 - `data/main` - миры и конфиги основного сервера
 - `data/shooter` - миры и конфиги второго сервера
+- `data/vanilla` - миры ванильного сервера
 - `mods/server` - общие серверные моды
 
 Если раньше был один мир в `data/world`, перенеси его в `data/main/world` и обнови `LEVEL_NAME`, если нужно.
 
 Каталог `config` общий для обоих серверов. Если нужна раздельная настройка модов, сделай два каталога и обнови compose.
 
-Переключение миров работает через `LEVEL_NAME` и `SHOOTER_LEVEL_NAME`.
+Переключение миров работает через `LEVEL_NAME`, `SHOOTER_LEVEL_NAME`, `VANILLA_LEVEL_NAME`.
 
 ## Управление через бота
 
@@ -40,16 +42,17 @@
 - статус контейнеров и логи;
 - просмотр и правку env;
 - список модов с ссылками;
-- выбор сервера (main/shooter);
+- выбор сервера (main/shooter/vanilla);
 - управление мирами (список, переключение, новый мир, загрузка ZIP/URL, бэкапы).
 
 ## Makefile команды (основные)
 
-- `make up` — поднять основной сервер + бот
-- `make up-all` — поднять оба сервера + бот
-- `make up-one SERVER=shooter` — поднять только один сервер
-- `make logs SERVER=shooter` — логи выбранного сервера
-- `make clean-data` — удалить `data/main` и `data/shooter` (опасно)
+- `make up` - поднять основной сервер + бот
+- `make up-all` - поднять все сервера + бот
+- `make up-one SERVER=shooter` - поднять только один сервер
+- `make up-bot` - поднять только бота
+- `make logs SERVER=shooter` - логи выбранного сервера
+- `make clean-data` - удалить `data/main`, `data/shooter`, `data/vanilla` (опасно)
 
 ## Документация
 

@@ -49,12 +49,12 @@ make fetch-mods
 
 ```bash
 make up           # основной сервер + бот
-make up-all       # оба сервера + бот
+make up-all       # все сервера + бот
 ```
 
 ## 7. Systemd (автостарт)
 
-### Основной + shooter + бот (рекомендуется)
+### Только бот (рекомендуется)
 
 Скопируй файл:
 
@@ -66,7 +66,7 @@ sudo cp deploy/systemd/new-sborka-hard.service /etc/systemd/system/new-sborka-ha
 
 ```ini
 [Unit]
-Description=New Sborka Hard (main + shooter + bot)
+Description=New Sborka Hard (bot only)
 After=network-online.target docker.service
 Wants=network-online.target
 Requires=docker.service
@@ -76,12 +76,14 @@ Type=oneshot
 RemainAfterExit=yes
 WorkingDirectory=/root/new_sborka_hard
 Environment=ENV_FILE=env/production.env
-ExecStart=/usr/bin/make up-all
-ExecStop=/usr/bin/make down
+ExecStart=/usr/bin/make up-bot
+ExecStop=/usr/bin/make stop-bot
 
 [Install]
 WantedBy=multi-user.target
 ```
+
+Серверы запускай вручную (`make up`, `make up-one SERVER=...`) или через Telegram-бота.
 
 ### Только shooter (опционально)
 
@@ -106,6 +108,29 @@ ExecStop=/usr/bin/make stop SERVER=shooter
 WantedBy=multi-user.target
 ```
 
+### Только vanilla (опционально)
+
+`/etc/systemd/system/new-sborka-hard-vanilla.service`:
+
+```ini
+[Unit]
+Description=New Sborka Hard (vanilla)
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+WorkingDirectory=/root/new_sborka_hard
+Environment=ENV_FILE=env/production.env
+ExecStart=/usr/bin/make up-one SERVER=vanilla
+ExecStop=/usr/bin/make stop SERVER=vanilla
+
+[Install]
+WantedBy=multi-user.target
+```
+
 ### Очистка предметов
 
 Используй сервисы из `deploy/systemd/`:
@@ -118,6 +143,7 @@ WantedBy=multi-user.target
 sudo systemctl daemon-reload
 sudo systemctl enable --now new-sborka-hard.service
 sudo systemctl enable --now new-sborka-hard-shooter.service # если нужен отдельный сервис
+sudo systemctl enable --now new-sborka-hard-vanilla.service # если нужен отдельный сервис
 sudo systemctl enable --now new-sborka-hard-cleanup.service
 ```
 
@@ -126,3 +152,4 @@ sudo systemctl enable --now new-sborka-hard-cleanup.service
 Открой TCP порты:
 - 25565 (main)
 - 25566 (shooter)
+- 25567 (vanilla)

@@ -71,6 +71,39 @@
       - ./mods/server:/data/mods
       - ./docker/artifacts:/data/artifacts
 
+  minecraft_vanilla:
+    container_name: forge-server-vanilla
+    mem_limit: "${VANILLA_MEMORY_MAX:-15g}"
+    cpus: "${VANILLA_CPUS:-4}"
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MC_VERSION: "${VANILLA_MC_VERSION:-1.20.1}"
+    restart: unless-stopped
+    ports:
+      - "${VANILLA_SERVER_PORT:-25567}:25565"
+    environment:
+      EULA: "${VANILLA_EULA}"
+      TYPE: "VANILLA"
+      VERSION: "${VANILLA_MC_VERSION:-1.20.1}"
+      INIT_MEMORY: "${VANILLA_MEMORY_MIN:-8G}"
+      MAX_MEMORY: "${VANILLA_MEMORY_MAX:-15G}"
+      SERVER_NAME: "${VANILLA_SERVER_NAME}"
+      DIFFICULTY: "${VANILLA_DIFFICULTY}"
+      MAX_PLAYERS: "${VANILLA_MAX_PLAYERS}"
+      ONLINE_MODE: "${VANILLA_ONLINE_MODE}"
+      LEVEL_NAME: "${VANILLA_LEVEL_NAME}"
+      SEED: "${VANILLA_SEED}"
+      VIEW_DISTANCE: "${VANILLA_VIEW_DISTANCE}"
+      ALLOW_NETHER: "${VANILLA_ALLOW_NETHER}"
+      ALLOW_FLIGHT: "${VANILLA_ALLOW_FLIGHT}"
+      PVP: "${VANILLA_PVP}"
+      ENABLE_COMMAND_BLOCK: "${VANILLA_ENABLE_COMMAND_BLOCK}"
+      ENABLE_BONUS_CHEST: "${VANILLA_ENABLE_BONUS_CHEST}"
+    volumes:
+      - ./data/vanilla:/data
+
   bot:
     container_name: forge-bot
     build:
